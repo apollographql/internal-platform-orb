@@ -52,8 +52,6 @@ workflows:
           dir: ./src/scripts
           exclude: SC2148,SC2001,SC1091,SC2086,SC2116,SC2046,SC2005,SC2002
       # optional: Run BATS tests against your scripts
-      - bats/run:
-          path: ./src/tests
       # Publish development version(s) of the orb.
       - orb-tools/publish:
           name: "Publish Dev version"
