@@ -56,7 +56,7 @@ workflows:
       - orb-tools/publish:
           name: "Publish Dev version"
           orb-name: apollo/internal-platform-orb
-          circleci-token: CIRCLECI_TOKEN
+          circleci-token: CIRCLE_TOKEN
           vcs-type: << pipeline.project.type >>
           github-token: GH_BOT_KEY
           context:
