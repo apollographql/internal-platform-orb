@@ -59,6 +59,8 @@ workflows:
           circleci-token: CIRCLECI_TOKEN
           vcs-type: << pipeline.project.type >>
           github-token: GH_BOT_KEY
+          context:
+            - orb-publishing
           requires:
             - orb-tools/lint
             - orb-tools/pack
