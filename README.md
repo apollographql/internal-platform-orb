@@ -21,19 +21,24 @@ _**Edit this area to include a custom title and description.**_
 
 ### How to Contribute
 
-We welcome [issues](https://github.com/<organization>/<project-name>/issues) to and [pull requests](https://github.com/<organization>/<project-name>/pulls) against this repository!
+Important note: this is not an officially supported project of Apollo GraphQL. You're welcome to use, and see how we do things internally, but support or pull requests are answered on a as-availible basis.
 
-### How to Publish An Update
-1. Merge pull requests with desired changes to the main branch.
-    - For the best experience, squash-and-merge and use [Conventional Commit Messages](https://conventionalcommits.org/).
-2. Find the current version of the orb.
-    - You can run `circleci orb info <namespace>/<orb-name> | grep "Latest"` to see the current version.
-3. Create a [new Release](https://github.com/<organization>/<project-name>/releases/new) on GitHub.
-    - Click "Choose a tag" and _create_ a new [semantically versioned](http://semver.org/) tag. (ex: v1.0.0)
-      - We will have an opportunity to change this before we publish if needed after the next step.
-4.  Click _"+ Auto-generate release notes"_.
-    - This will create a summary of all of the merged pull requests since the previous release.
-    - If you have used _[Conventional Commit Messages](https://conventionalcommits.org/)_ it will be easy to determine what types of changes were made, allowing you to ensure the correct version tag is being published.
-5. Now ensure the version tag selected is semantically accurate based on the changes included.
-6. Click _"Publish Release"_.
-    - This will push a new tag and trigger your publishing pipeline on CircleCI.
+If you do have [issues](https://github.com/apollographql/internal-platform-orb/issues), or[pull requests](https://github.com/apollographql/internal-platform-orb/pulls) feel free, but...
+
+
+### How to test PRs
+1. Create and push a branch with your new features.
+2. A build will automatically happen in Circle. In the `test-pack` workflow there's a `Publish Dev version` job, and the `Publish Orb Release` step within that job. Find text in that output about "Orb apollo/internal-platform-orb@dev:SHA`.
+3. Copy/paste that `@dev:SHA1` info into the config.yml you're using this orb from.
+4. Test the orb
+5. Upon merge of the PR update the config.yml from step 3 to be the correct and published version, as `dev` tags last only 90 days.
+
+### Notes on Publishing a new version
+
+Upon merge of a PR we use [nextgen-versioning orb](https://circleci.com/developer/orbs/orb/mybudget-dev/nextgen-versioning) will automatically increase the patch level version of the latest tag, and tag the commit.
+
+This tagging will triggered CircleCI again which will publish the orb
+
+"But what if I have a minor/major breaking changes?"
+
+You may have to manually create your new tag, ideally before merging the PR, then let the system take over from there. Slightly limitation of the nextgen-versioning orb we're using.
