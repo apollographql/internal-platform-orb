@@ -5,11 +5,7 @@
 
 --->
 
-A project template for Orbs.
-
-This repository is designed to be automatically ingested and modified by the CircleCI CLI's `orb init` command.
-
-_**Edit this area to include a custom title and description.**_
+An orb full of useful code we've developed at Apollo GraphQL, and we're open-sourcing for community use.
 
 ---
 
