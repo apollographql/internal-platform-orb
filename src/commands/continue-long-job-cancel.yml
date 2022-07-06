@@ -1,4 +1,5 @@
 description: for any job that is old, cancel it and warn the people
+
 parameters:
   org-repo-slug:
     type: string
@@ -9,6 +10,7 @@ parameters:
   circleci-token-variable:
     description: the name of the environmental variable that contains the circleci token
     default: "CIRCLECI_TOKEN"
+    type: string
 
 steps:
   - run:
