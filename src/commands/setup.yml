@@ -1,7 +1,7 @@
 description: Downloads the original repository, for helper scripts
 
 parameters:
-  download_reference:
+  download-reference:
     type: string
     description: "tag number OR URL encoded string"
     default: main
@@ -9,7 +9,7 @@ parameters:
 steps:
   - run:
       command: |
-        curl -L --output /tmp/source.tar.gz "https://api.github.com/repos/apollographql/internal-platform-orb/tarball/<< parameters.download_reference >>"
+        curl -L --output /tmp/source.tar.gz "https://api.github.com/repos/apollographql/internal-platform-orb/tarball/<< parameters.download-reference >>"
         mkdir -P /tmp/apollo_internal_platform_orb
         tar -xzf /tmp/source.tar.gz -C /tmp/apollo_internal_platform_orb --strip-components=1
   - store_artifacts:
