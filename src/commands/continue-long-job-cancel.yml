@@ -1,4 +1,4 @@
-description: for any job that is old, cancel it and warn the people
+description: for any job that is old, cancel it and warn the people. Must run the setup command on each new executor
 
 parameters:
   org-repo-slug:
