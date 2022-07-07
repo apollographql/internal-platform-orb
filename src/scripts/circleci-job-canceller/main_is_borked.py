@@ -29,7 +29,7 @@ def make_graphql_query(githubtoken, orgreposlug):
   viewer {
     organization(login: $org_name) {
       repository(name: $repo_name) {
-        object(expression: "6eee88887f5736054c5749552250a5d77dfa6ed1") {
+        object(expression: "main") {
           ... on Commit {
             commitUrl
             status {
