@@ -6,12 +6,12 @@ parameters:
   do-docker-login:
     type: enum
     default: ""
-    values: ["", "true"]
+    enum: ["", "true"]
     description: "Have Docker use these creds to log into Google Artifact Registry, where we have a Docker registry. Likely will need to run setup_remote_docker command first. "
   do-helm-login:
     type: enum
     default: ""
-    values: ["", "true"]
+    enum: ["", "true"]
     description: "Have Helm use these creds to log into Google Artifact Registry, using Helm's support for OCI registries."
 steps:
   - run:
