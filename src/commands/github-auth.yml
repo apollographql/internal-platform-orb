@@ -1,0 +1,14 @@
+description: >
+  Authorize Github. Run this before any other github- command in this orb. Pulls Github personal token from GH_BOT_KEY_B64 environment variable (in base64 encoded...)
+steps:
+  - run:
+      name: Setup GH Creds
+      command: |
+        echo "$GH_BOT_KEY_B64" | base64 -d > /tmp/gh-token
+  - run:
+      name: Auth with GH
+      command: |
+        gh auth login --with-token < /tmp/gh-token
+  - run:
+      name: Delete token file
+      command: rm /tmp/gh-token
