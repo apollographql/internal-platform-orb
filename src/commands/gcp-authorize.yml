@@ -4,13 +4,15 @@ parameters:
     type: string
     description: "the value of this specified environment variable contains the key, either in base64 or just JSON (we'll figure it out)"
   do-docker-login:
-    type: string
+    type: enum
     default: ""
-    description: "Also log into our Docker registry. Likely will need to run setup_remote_docker command first"
+    values: ["", "true"]
+    description: "Have Docker use these creds to log into Google Artifact Registry, where we have a Docker registry. Likely will need to run setup_remote_docker command first. "
   do-helm-login:
-    type: string
+    type: enum
     default: ""
-    description: "Log into our Helm registry"
+    values: ["", "true"]
+    description: "Have Helm use these creds to log into Google Artifact Registry, using Helm's support for OCI registries."
 steps:
   - run:
       name: Setup cred file
