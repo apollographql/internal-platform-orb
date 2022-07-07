@@ -1,0 +1,43 @@
+description: Authorize GCP from the contents of an environmental variable with optional base64 decoding step. You must have installed the gcloud command line tool yourself, previously. This is a slightly enhanced version of the gcp-cli orb's authorize command
+parameters:
+  environment-variable-name:
+    type: string
+    description: "the value of this specified environment variable contains the key, either in base64 or just JSON (we'll figure it out)"
+  do-docker-login:
+    type: string
+    default: ""
+    description: "Also log into our Docker registry. Likely will need to run setup_remote_docker command first"
+  do-helm-login:
+    type: string
+    default: ""
+    description: "Log into our Helm registry"
+steps:
+  - run:
+      name: Setup cred file
+      command: |
+        echo "$<< parameters.environment-variable-name >>" > /tmp/google_auth.json
+        if grep "{" /tmp/google_auth.json ; then
+          # not base64 encoded? Great!
+          echo "does not need base64 decoding"
+        else
+          base64 -d --ignore-garbage -i /tmp/google_auth.json > /tmp/google_auth_decoded.json
+          mv /tmp/google_auth_decoded.json /tmp/google_auth.json
+        fi
+  - run:
+      name: GCloud auth
+      command: gcloud auth login --cred-file=/tmp/google_auth.json
+  - run:
+      name: Container related registry logins
+      command: |
+        if [ -n "<< parameters.do-docker-login >>" ]; then
+          gcloud auth configure-docker --quiet us-central1-docker.pkg.dev,gcr.io
+        fi
+
+        if [ -n "<< parameters.do-helm-login >>" ]; then
+          cat /tmp/google_auth.json | helm registry login -u _json_key --password-stdin https://us-central1-docker.pkg.dev
+        fi
+  - run:
+      name: Delete cred file
+      command: |
+        rm -f /tmp/google_auth_decoded.json
+        rm /tmp/google_auth.json
