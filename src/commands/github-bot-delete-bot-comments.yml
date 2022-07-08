@@ -7,6 +7,9 @@ parameters:
   bot-making-comments:
     type: string
     description: name of the bot making all these comments
+  really-delete-comments:
+    type: boolean
+    default: true
 steps:
   - run:
       name: Delete all comments from this user
@@ -14,6 +17,13 @@ steps:
       command: |
           export PR_NUMBER=$(echo "$CIRCLE_PULL_REQUEST" | cut -d '/' -f 7)
           echo $CIRCLE_PULL_REQUEST $PR_NUMBER
+
+          if [ "<< parameters.really-delete-comments >>" -ne "true"];
+          then
+            echo "Halted at step: do not actually delete comments"
+            circleci-agent step halt
+          fi
+
           gh api repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/issues/$PR_NUMBER/comments \
             -q '.[] | select(.user.login == "<< parameters.bot-making-comments >>") | select(.body | startswith("## << parameters.title >>")) | .id' \
           | xargs -I{} -n1 gh api repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/issues/comments/{} -X=DELETE

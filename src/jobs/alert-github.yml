@@ -51,12 +51,10 @@ steps:
   - attach_workspace:
       at: /tmp/workspace
   - github-auth
-  - when:
-      condition: << parameter.delete-bot-comments >>
-      steps:
-        - github-bot-delete-bot-comments:
-          title: << parameters.title >>
-          bot-making-comments: << parameters.bot-making-comments >>
+  - github-bot-delete-bot-comments:
+      title: << parameters.title >>
+      bot-making-comments: << parameters.bot-making-comments >>
+      really-delete-comments: << parameters.delete-bot-comments >>
   - proceed-if-changes:
       path: << parameters.path >>
       name-filter: << parameters.name-filter >>
