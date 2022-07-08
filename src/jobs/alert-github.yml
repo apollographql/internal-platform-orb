@@ -32,6 +32,10 @@ parameters:
   bot-making-comments:
     type: string
     description: "name of the bot making comments"
+  delete-bot-comments:
+    type: boolean
+    default: true
+    description: "Delete comments previously made by the delete-bot-comments bot"
 docker:
   - image: cimg/base:stable
 resource_class: small
@@ -47,9 +51,11 @@ steps:
   - attach_workspace:
       at: /tmp/workspace
   - github-auth
-  - github-bot-delete-bot-comments:
-      title: << parameters.title >>
-      bot-making-comments: << parameters.bot-making-comments >>
+  - when: << parameter.delete-bot-comments >>
+    steps:
+      - github-bot-delete-bot-comments:
+        title: << parameters.title >>
+        bot-making-comments: << parameters.bot-making-comments >>
   - proceed-if-changes:
       path: << parameters.path >>
       name-filter: << parameters.name-filter >>
