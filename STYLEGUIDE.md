@@ -5,7 +5,7 @@ This CircleCI orb attempts to adhere to the following style guide:
   * Env Vars: UPPERCASE/snake_case
   * Parameters: lowercase/kebab-case
   * Job names: lowercase/kebab-case
-  * Command names: lowercase/kebab-case
+  * Command names: lowercase/kebab-case and if it interacts with another service (ie github, circleci itself) should suffix that service name (like a namespace)
   * Workflow names: lowercase/kebab-case
   * Mustache-y data:
 
