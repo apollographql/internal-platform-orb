@@ -51,7 +51,7 @@ steps:
     name-filter: << parameters.name-filter >>
     changes-iregex: << parameters.changes-iregex >>
     no-changes-iregex: << parameters.no-changes-iregex >>
-- alert-slack:
+- alert-slack-compact:
     channel: << parameters.channel >>
     notify: << parameters.notify >>
     fail: << parameters.fail >>
