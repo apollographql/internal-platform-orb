@@ -47,7 +47,7 @@ steps:
       name: Command result to environment variable
       command: |
         echo "export NOTIFICATION_TEXT='$(cat /tmp/notification.txt)'" >> $BASH_ENV
-  - alert-slack-notify:
+  - alert-slack-compact:
       channel: "$NOTIFICATION_CHANNEL"
       custom: |
         {
