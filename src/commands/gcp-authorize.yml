@@ -3,6 +3,7 @@ parameters:
   environment-variable-name:
     type: string
     description: "the value of this specified environment variable contains the key, either in base64 or just JSON (we'll figure it out)"
+    default: "GCLOUD_SERVICE_ACCOUNT"
   do-docker-login:
     type: enum
     default: ""
