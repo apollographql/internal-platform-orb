@@ -18,7 +18,7 @@ steps:
           export PR_NUMBER=$(echo "$CIRCLE_PULL_REQUEST" | cut -d '/' -f 7)
           echo $CIRCLE_PULL_REQUEST $PR_NUMBER
 
-          if [ "<< parameters.really-delete-comments >>" -ne "true" ];
+          if [ "<< parameters.really-delete-comments >>" != "true" ];
           then
             echo "Halted at step: do not actually delete comments"
             circleci-agent step halt
