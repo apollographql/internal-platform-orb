@@ -21,7 +21,7 @@ steps:
           if [ "<< parameters.really-delete-comments >>" != "true" ];
           then
             echo "Halted at step: do not actually delete comments"
-            circleci-agent step halt
+            exit 0
           fi
 
           gh api repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/issues/$PR_NUMBER/comments \
