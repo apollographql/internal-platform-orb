@@ -1,0 +1,18 @@
+parameters:
+  working-directory:
+    type: string
+    default: /code
+steps:
+  - run:
+      name: fmt
+      command: terragrunt hclfmt
+      working_directory: << parameters.working-directory >>
+  - run:
+      name: "Checking there are no changes after formatting (if this fails, run 'terragrunt hclfmt on each listed file"
+      # Complain if any files are changed (and show the diff).
+      command: "git diff --exit-code"
+      working_directory: << parameters.working-directory >>
+  - run:
+      name: "check .tf file formatting"
+      command: terraform fmt -recursive -check
+      working_directory: << parameters.working-directory >>
