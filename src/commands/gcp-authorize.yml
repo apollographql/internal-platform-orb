@@ -29,6 +29,12 @@ steps:
       name: Setup cred file
       command: |
         echo "$<< parameters.environment-variable-name >>" > /tmp/google_auth.json
+
+        if [ ! -s /tmp/google_auth.json ]; then
+          echo "Empty environment-variable-name provided, this one is blank"
+          exit 1
+        fi
+
         if grep "{" /tmp/google_auth.json ; then
           # not base64 encoded? Great!
           echo "does not need base64 decoding"
