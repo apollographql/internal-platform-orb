@@ -31,7 +31,7 @@ steps:
         printf '%s' "$<< parameters.environment-variable-name >>" > /tmp/google_auth.json
 
         if [ ! -s /tmp/google_auth.json ]; then
-          echo "Empty environment-variable-name provided, this one is blank"
+          echo "Contents of << parameters.environment-variable-name >> was empty"
           exit 1
         fi
 
