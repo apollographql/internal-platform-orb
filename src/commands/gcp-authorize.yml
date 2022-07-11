@@ -28,7 +28,7 @@ steps:
   - run:
       name: Setup cred file
       command: |
-        echo "$<< parameters.environment-variable-name >>" > /tmp/google_auth.json
+        printf '%s' "$<< parameters.environment-variable-name >>" > /tmp/google_auth.json
 
         if [ ! -s /tmp/google_auth.json ]; then
           echo "Empty environment-variable-name provided, this one is blank"
