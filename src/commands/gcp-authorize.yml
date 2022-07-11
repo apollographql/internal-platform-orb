@@ -56,7 +56,7 @@ steps:
   - run:
       name: Delete cred file
       command: |
-        if [ "<< parameters.delete-creds-file >>" == "true" ]; then
+        if [ "<< parameters.delete-cred-file >>" == "true" ]; then
           rm -f /tmp/google_auth_decoded.json
           rm /tmp/google_auth.json
         fi
