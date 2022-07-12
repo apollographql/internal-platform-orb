@@ -26,5 +26,7 @@ function check_directories_in {
     done
 }
 
-check_directories_in resources
-check_directories_in environments
+for var in "$@"
+do
+  check_directories_in "$var"
+done
