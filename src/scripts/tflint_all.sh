@@ -3,7 +3,7 @@
 set -e
 
 function has_hcl_files {
-    ls -l $1/**/*.tf > /dev/null
+    find $1 -name '*.tf' | grep '.tf' > /dev/null
 }
 
 function check_directories_in {
