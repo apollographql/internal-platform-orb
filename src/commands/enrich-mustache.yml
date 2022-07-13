@@ -1,0 +1,18 @@
+parameters:
+  json-data-file-path:
+    type: string
+  template-file-path:
+    type: string
+  output-file-path:
+    type: string
+steps:
+  - run:
+      name: enrich-mustache
+      command: |
+        python3 -m pip install chevron
+        SCRATCH=$(mktemp -t tmp.enrich-mustache.XXXX)
+
+        chevron -d << parameters.json-data-file-path >> << parameters.template-file-path >> > $SCRATCH
+
+        mkdir -p $(dirname << parameters.output-file-path >>)
+        mv $SCRATCH << parameters.output-file-path >>
