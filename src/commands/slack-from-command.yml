@@ -1,5 +1,5 @@
 description: >
-  alert-slack where the message content is from running a command. That command MUST output /tmp/notification.txt. If no (or blank) file execution is halted
+  Post a Slack message where the message content is from running a command. That command MUST output /tmp/notification.txt. If no (or blank) file execution is halted
 
   NOTE: Must be run with the slack-orb context
 
