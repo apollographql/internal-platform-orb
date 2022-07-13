@@ -5,7 +5,7 @@ parameters:
     description: vsc provider plus org name. Example github/apollographql
   pipeline-file-path:
     type: string
-  circleci-token-evironment-variable:
+  circleci-token-environment-variable:
     type: string
 steps:
   - run:
