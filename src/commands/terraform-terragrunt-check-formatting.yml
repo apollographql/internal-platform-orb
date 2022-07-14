@@ -10,11 +10,13 @@ parameters:
     default: true
 steps:
   - run:
-      name: fmt
+      name: terragrunt file formatting check
       command: |
         if [ "<< parameters.check-terragrunt >>" == "true" ];
         then
           terragrunt hclfmt
+        else
+          echo "skipping terragrunt file format check"
         fi
       working_directory: << parameters.working-directory >>
   - run:
@@ -23,10 +25,12 @@ steps:
       command: "git diff --exit-code"
       working_directory: << parameters.working-directory >>
   - run:
-      name: "check .tf file formatting"
+      name: terraform file formatting check
       command: |
         if [ "<< parameters.check-terraform >>" == "true" ];
         then
           terraform fmt -recursive -check
+        else
+          echo "skipping terraform format check"
         fi
       working_directory: << parameters.working-directory >>
