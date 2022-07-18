@@ -86,7 +86,7 @@ workflows:
       - orb-tools/publish:
           name: "Auto publish based on tag push"
           orb-name: apollo/internal-platform-orb
-          circleci-token: CIRCLECI_TOKEN
+          circleci-token: CIRCLE_TOKEN
           vcs-type: << pipeline.project.type >>
           pub-type: production
           github-token: GH_BOT_KEY
