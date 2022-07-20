@@ -21,6 +21,7 @@ steps:
           if [ -z "$PR_NUMBER" ];
           then
             echo "No pull request (yet): do not try to delete commments"
+            exit 0
           fi
 
           if [ "<< parameters.really-delete-comments >>" != "true" ];
