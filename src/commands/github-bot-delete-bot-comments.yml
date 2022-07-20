@@ -18,6 +18,12 @@ steps:
           export PR_NUMBER=$(echo "$CIRCLE_PULL_REQUEST" | cut -d '/' -f 7)
           echo $CIRCLE_PULL_REQUEST $PR_NUMBER
 
+          if [ -z "$PR_NUMBER" ];
+          then
+            echo "No pull request (yet): do not try to delete commments"
+            exit 0
+          fi
+
           if [ "<< parameters.really-delete-comments >>" != "true" ];
           then
             echo "Halted at step: do not actually delete comments"
