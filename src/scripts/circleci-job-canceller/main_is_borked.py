@@ -8,6 +8,8 @@ import json
 import http
 import datetime
 import sys
+import re
+
 from dateutil.parser import *
 
 # Turn on / off debugging
@@ -72,7 +74,7 @@ def make_graphql_query(githubtoken, orgreposlug):
     return res
 
 
-def main(githubtoken, orgreposlug):
+def main(githubtoken, orgreposlug, circleapitoken):
     now = datetime.datetime.now( datetime.timezone(datetime.timedelta(hours=0)) ) #datetime in UTC
 
     res = make_graphql_query(githubtoken, orgreposlug)
@@ -109,6 +111,20 @@ def main(githubtoken, orgreposlug):
         if ( len(pending_workflows) > 0 ):
             jobs_started_str = pending_workflows[0].get("createdAt")
             workflow_link = pending_workflows[0].get("targetUrl")   # will always be the same targetURL
+            workflow_id = None
+
+            # we might have a situation where the job is already cancelled, but the Github build status indicator doesn't reflect that
+            # so, if there's a workflow ID, use it to get the _real_ status of the job. If it is cancelled, well thanks other robot?
+            if "/workflow-run/" in workflow_link:
+                workflow_id = re.search("https://circleci.com/workflow-run/(.+)\?", workflow_link).group(1)
+
+            if workflow_id and circleapitoken:
+                api_url = f"https://circleci.com/api/v2/workflow/{workflow_id}"
+                standard_headers = {"Circle-Token": circleapitoken}
+
+                workflow_info = requests.get(api_url, headers=standard_headers).json()
+                if workflow_info.get("status") == "canceled":
+                    return
 
             jobs_stated_dt = isoparse(jobs_started_str)
 
@@ -123,12 +139,15 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
     parser.add_argument("githubapitoken", help="the Github API token for this script")
+
     # Token needs to have the following scopes:
     #   * admin:org read:org
     #   * repo repo:status
 
     parser.add_argument("orgreposlug", help="the location, user-or-org/repository-name , of this repository")
 
+    parser.add_argument("--circleapitoken", default=None, type=str, help="the CircleCI API token for this script")
+
     args = parser.parse_args()
 
-    main(args.githubapitoken, args.orgreposlug)
+    main(args.githubapitoken, args.orgreposlug, args.circleapitoken)
