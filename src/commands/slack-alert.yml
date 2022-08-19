@@ -20,7 +20,7 @@ parameters:
 steps:
   - slack-notify-compact:
       event: pass
-      channel: "$NOTIFICATION_CHANNEL"
+      channel: << parameters.channel >>
       custom: |
         {
           "blocks": [{
@@ -33,7 +33,7 @@ steps:
         }
   - slack-notify-compact:
       event: fail
-      channel: "$NOTIFICATION_CHANNEL"
+      channel: << parameters.channel >>
       custom: |
         {
           "blocks": [{
