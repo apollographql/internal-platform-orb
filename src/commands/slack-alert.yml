@@ -9,11 +9,11 @@ parameters:
     type: string
     description: The name of the SINGLE channel you want to post to.
   pass:
-    types: string
+    type: string
     description: |
       Markdown enabled text to be placed in the failure message to Slack.
   fail:
-    types: string
+    type: string
     description: |
       Markdown enabled text to be placed in the failure message to Slack.
 
