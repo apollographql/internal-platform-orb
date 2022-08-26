@@ -36,7 +36,7 @@ jobs:
       - checkout
       - add_ssh_keys:
           fingerprints:
-            - "jutRwtIAL/iQuhD0yrnqxrv9Kaa3YqAcGO/yuORkVyY"
+            - "60:6b:bb:7e:68:74:ef:e1:ad:c0:50:e3:ee:14:44:d0"
       - nextgen-versioning/git-tag:
           tag-type: ''
 
