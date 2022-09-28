@@ -19,6 +19,14 @@ parameters:
     default: ""
     enum: ["", "true"]
     description: "This is a service account that should be authed"
+  do-gke-login:
+    type: string
+    default: ""
+    description: "authorize into the GKE cluster named by this string"
+  in-region:
+    type: string
+    default: "us-central1"
+    description: "For actions, in particular do-gke-login / do-helm-login / do-docker-login that are regional"
   delete-cred-file:
     type: enum
     default: "true"
@@ -49,15 +57,19 @@ steps:
       name: Container related registry logins
       command: |
         if [ -n "<< parameters.do-docker-login >>" ]; then
-          gcloud auth configure-docker --quiet us-central1-docker.pkg.dev,gcr.io
+          gcloud auth configure-docker --quiet << parameters.in-region >>-docker.pkg.dev,gcr.io
         fi
 
         if [ -n "<< parameters.do-helm-login >>" ]; then
-          cat /tmp/google_auth.json | helm registry login -u _json_key --password-stdin https://us-central1-docker.pkg.dev
+          cat /tmp/google_auth.json | helm registry login -u _json_key --password-stdin https://<< parameters.in-region >>-docker.pkg.dev
         fi
 
         if [ -n "<< parameters.do-activate-service-account >>" ]; then
           gcloud auth activate-service-account --key-file /tmp/google_auth.json
+        fi
+
+        if [ -n "<< parameters.do-gke-login >>" ]; then
+          gcloud container clusters get-credentials << parameters.do-gke-login >> --region=<< parameters.in-region >>
         fi
   - run:
       name: Delete cred file
