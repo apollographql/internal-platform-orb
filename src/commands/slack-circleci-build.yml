@@ -42,7 +42,7 @@ steps:
             "type": "section",
             "text": {
               "type": "mrkdwn",
-              "text": "<< parameters.emoji >> *gh:$CIRCLE_USERNAME* << parameters.notify >> :link: <https://app.circleci.com/pipelines/workflows/$CIRCLE_WORKFLOW_ID|View on CircleCI>. <https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/commit/$CIRCLE_SHA1|View on Github>"
+              "text": "<< parameters.emoji >> *gh:$CIRCLE_USERNAME* in ghrepo:$CIRCLE_PROJECT_REPONAME: << parameters.notify >> :link: <https://app.circleci.com/pipelines/workflows/$CIRCLE_WORKFLOW_ID|View on CircleCI>. <https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/commit/$CIRCLE_SHA1|View on Github>"
             }
           }]
         }
@@ -62,7 +62,7 @@ steps:
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": ":alert: *FAILED gh:$CIRCLE_USERNAME* << parameters.notify >> << parameters.fail >> :link: <https://app.circleci.com/pipelines/workflows/$CIRCLE_WORKFLOW_ID|View on CircleCI>. <https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/commit/$CIRCLE_SHA1|View on Github>"
+                  "text": ":alert: *FAILED gh:$CIRCLE_USERNAME* in ghrepo:$CIRCLE_PROJECT_REPONAME: << parameters.notify >> << parameters.fail >> :link: <https://app.circleci.com/pipelines/workflows/$CIRCLE_WORKFLOW_ID|View on CircleCI>. <https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/commit/$CIRCLE_SHA1|View on Github>"
                 }
               }]
             }
