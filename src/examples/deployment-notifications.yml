@@ -10,7 +10,8 @@ usage:
 
   jobs:
     build-and-deploy-it:
-      docker: cimg/openjdk:17.0.3
+      docker:
+        - image: cimg/openjdk:17.0.3
       steps:
         - run:
             command: "echo 'I would build something'"
