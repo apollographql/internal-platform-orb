@@ -38,7 +38,7 @@ parameters:
     default: deploys-staging
 steps:
 - checkout
-- oss-internal-platform-orb/gcp-authorize:
+- gcp-authorize:
     environment-variable-name: GCLOUD_SERVICE_ACCOUNT
     do-helm-login: 'true'
 - run:
