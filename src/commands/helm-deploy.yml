@@ -80,7 +80,7 @@ steps:
 - unless:
     condition: << parameters.dry-run >>
     steps:
-      - oss-internal-platform-orb/slack-circleci-build:
+      - slack-circleci-build:
           notify: "*starting deploy* of << parameters.app-name >>->-<< parameters.component >> to platform-<< parameters.environment >>"
           channel: << parameters.channel >>
           emoji: ':ship:'
@@ -90,7 +90,7 @@ steps:
           command: |
             echo "Upgrading the application '<< parameters.app-name >>>-<< parameters.component >>' version: $(<.version)"
             helm upgrade << parameters.app-name >>>-<< parameters.component >> ./ "${PARAMS[@]}"
-      - oss-internal-platform-orb/slack-circleci-build:
+      - slack-circleci-build:
           notify: "*finished deploy* of << parameters.app-name >>->-<< parameters.component >> to platform-<< parameters.environment >>"
           channel: << parameters.channel >>
           emoji: ':checkered_flag:'
