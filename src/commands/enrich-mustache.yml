@@ -9,7 +9,7 @@ steps:
   - run:
       name: enrich-mustache
       command: |
-        python3 -m pip install chevron
+        python3 -m pip install --user chevron
         SCRATCH=$(mktemp -t tmp.enrich-mustache.XXXX)
 
         chevron -d << parameters.json-data-file-path >> << parameters.template-file-path >> > $SCRATCH
