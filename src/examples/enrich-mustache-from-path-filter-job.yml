@@ -50,8 +50,10 @@ usage:
 
   orbs:
     apollo-internal-platform-orb: apollo/internal-platform-orb@1.0.1
-  jobs:
-     - apollo-internal-platform-orb/enrich-mustache-from-path-filter:
+  workflows:
+    launch-jobs:
+      jobs:
+       - apollo-internal-platform-orb/enrich-mustache-from-path-filter:
           base-revision: main
           config-path: .circleci/continue-config.yml
           mapping: |
