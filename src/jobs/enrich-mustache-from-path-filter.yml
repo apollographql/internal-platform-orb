@@ -1,0 +1,54 @@
+  # meant to be a drop in replacement for path-filtering/filter
+  # BUT: meant to be used in a situation where EITHER you
+  # want an easy way to use the rest of this orb's enhance-mustache
+  # functionality OR find that Circle's official path-filtering orb
+  # doesn't work for your use case anymore.
+  #
+  # For exmaple, Circle's path-filtering works great if you want to turn on or off
+  # currently defined workflows or part of a pipeline. But if you have
+  # a situation where you want to create many instances of the SAME
+  # jobs, this is much harder to keep DRY.
+  #
+  # In enrich-mustache-from-path-filter instead of passing parameters
+  # via CircleCI continutation pipeline, it renders the specified Circle
+  # pipeline as a mustache document. This Circle job was created to make the
+  # path from path-filter
+  #
+  # Rules for parameters provided in the mappings section:
+  #   1. these must be JSON literals
+  #   2. If the JSON literal is an array [], if multiple matches are
+  #      found then all the matched values will be concatinated in an array
+  #   3. If a value is not marked as an array then subsequent sets will override
+
+docker:
+  - image: 'cimg/python:3.11'
+parameters:
+  base-revision:
+    type: string
+  config-path:
+    type: string
+  mapping:
+    type: string
+steps:
+  - checkout
+  - setup:
+      download-reference: rwilcox%2Fadd-enrich-filtering-job
+  - run:
+      name: generate parameters
+      command: python3 /tmp/apollo_internal_platform_orb/src/scripts/generate-mustache-parameters.py
+      environment:
+        BASE_REVISION: << parameters.base-revision >>
+        MAPPING: << parameters.mapping >>
+        OUTPUT_PATH: /tmp/enrich-parameters.json
+  - enrich-mustache:
+      json-data-file-path: /tmp/enrich-parameters.json
+      template-file-path: << parameters.config-path >>
+      output-file-path: /tmp/generated_pipeline.yml
+  - run:
+      name: debugging output (pipeline)
+      command: cat /tmp/generated_pipeline.yml
+  - run:
+      name: debugging output (enrich-parameters)
+      command: cat /tmp/enrich-parameters.json
+  - continuation/continue:
+      configuration_path: /tmp/generated_pipeline.yml
