@@ -60,8 +60,11 @@ steps:
     name: Preparing Helm upgrade parameters
     command: |
       params=(--atomic --install --cleanup-on-fail --debug)
-      [[ -f << parameters.path >>/.chart/<< parameters.component >>/<< parameters.environment >>.yaml ]] && params+=("-f << parameters.environment >>.yaml")
       params+=("-f values.yaml")
+
+      # Apply environment-specific yaml if it exists
+      [[ -f << parameters.path >>/.chart/<< parameters.component >>/<< parameters.environment >>.yaml ]] && params+=("-f << parameters.environment >>.yaml")
+
       params+=("--namespace=<< parameters.domain >>")
       params+=("--set global.environment=<< parameters.environment >>")
       params+=("--set global.projectId=${<< parameters.project-id-env-var >>}")
