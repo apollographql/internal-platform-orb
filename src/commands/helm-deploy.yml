@@ -1,21 +1,33 @@
 description: >
-  Deploys Helm to ShuttleCrawler, assumes image version of component is set in .version
+  Deploys a Helm chart, assumes image version of component is set in .version
 parameters:
   app-name:
     type: string
-    description: Name of application to be deployed
+    description: Name of application to deploy
   environment:
     type: string
-    description: Environment to be deployed on (prod, staging, dev)
+    description: Environment to deploy to
+  channel:
+    type: string
+    default: deploys-staging
+    description: Slack channel to send notifications to
   component:
     type: string
-    description: Name of folder which contains the Helm Chart
+    description: Name of folder that contains the Helm Chart
   domain:
     type: string
     description: Domain (K8s namespace) to deploy to
+  fail:
+    type: string
+    default: <!subteam^SFNQZTE4Q>
+    description: Message to be included in slack notification on failure
   path:
     type: string
     description: Path to .chart folder of application
+  project-id-env-var:
+    type: string
+    default: GCLOUD_PROJECT_ID
+    description: Environment variable that contains the project ID to deploy to
   short-region:
     type: string
     default: usc1
@@ -32,10 +44,6 @@ parameters:
     type: boolean
     default: false
     description: If enabled, simulate an upgrade
-  channel:
-    type: string
-    description: Slack channel to send notifications to
-    default: deploys-staging
 steps:
 - checkout
 - gcp-authorize:
@@ -47,7 +55,7 @@ steps:
       gcloud container clusters get-credentials \
         platform-<< parameters.environment >>-<< parameters.region >>-cluster \
         --zone << parameters.region >> \
-        --project ${GCLOUD_PROJECT_ID}
+        --project ${<< parameters.project-id-env-var >>}
 - run:
     name: Preparing Helm upgrade parameters
     command: |
@@ -56,7 +64,7 @@ steps:
       params+=("-f values.yaml")
       params+=("--namespace=<< parameters.domain >>")
       params+=("--set global.environment=<< parameters.environment >>")
-      params+=("--set global.projectId=${GCLOUD_PROJECT_ID}")
+      params+=("--set global.projectId=${<< parameters.project-id-env-var >>}")
       params+=("--set global.shortRegion=<< parameters.short-region >>")
       params+=("--set global.region=<< parameters.region >>")
       params+=("--set global.registryRegion=<< parameters.registry-region >>")
@@ -95,4 +103,4 @@ steps:
           channel: << parameters.channel >>
           emoji: ':checkered_flag:'
           # The oncall subteam string is found from https://app.slack.com/client/T024JTSAP/DK3CTS2F4/user_groups
-          fail: '<!subteam^SFNQZTE4Q>'
+          fail: << parameters.fail >>
