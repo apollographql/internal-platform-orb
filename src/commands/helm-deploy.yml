@@ -1,5 +1,5 @@
 description: >
-  Deploys a Helm chart, assumes image version of component is set in .version
+  Deploys a Helm chart, assumes image version of component is set in .microservice_version
 parameters:
   app-name:
     type: string
@@ -71,7 +71,7 @@ steps:
       params+=("--set global.shortRegion=<< parameters.short-region >>")
       params+=("--set global.region=<< parameters.region >>")
       params+=("--set global.registryRegion=<< parameters.registry-region >>")
-      params+=("--set global.version=$(<.version)")
+      params+=("--set global.version=$(<.microservice_version)")
       echo "export PARAMS=(${params[@]})" >> "$BASH_ENV"
 - run:
     name: Building helm dependencies
@@ -86,7 +86,7 @@ steps:
         name: Deploy and release (Dry-run)
         working_directory: << parameters.path >>/.chart/<< parameters.component >>
         command: |
-          echo "Dry-run of upgrading the application '<< parameters.app-name >>>-<< parameters.component >>' version: $(<.version)"
+          echo "Dry-run of upgrading the application '<< parameters.app-name >>>-<< parameters.component >>' version: $(<.microservice_version)"
           helm upgrade << parameters.app-name >>->-<< parameters.component >> ./ --dry-run "${PARAMS[@]}"
 - unless:
     condition: << parameters.dry-run >>
@@ -99,7 +99,7 @@ steps:
           name: Deploy and release
           working_directory: << parameters.path >>/.chart/<< parameters.component >>
           command: |
-            echo "Upgrading the application '<< parameters.app-name >>>-<< parameters.component >>' version: $(<.version)"
+            echo "Upgrading the application '<< parameters.app-name >>>-<< parameters.component >>' version: $(<.microservice_version)"
             helm upgrade << parameters.app-name >>>-<< parameters.component >> ./ "${PARAMS[@]}"
       - slack-circleci-build:
           notify: "*finished deploy* of << parameters.app-name >>->-<< parameters.component >> to platform-<< parameters.environment >>"
