@@ -31,8 +31,7 @@ parameters:
     type: string
 steps:
   - checkout
-  - setup:
-      download-reference: rwilcox%2Fadd-enrich-filtering-job
+  - setup
   - run:
       name: generate parameters
       command: python3 /tmp/apollo_internal_platform_orb/src/scripts/generate-mustache-parameters.py
