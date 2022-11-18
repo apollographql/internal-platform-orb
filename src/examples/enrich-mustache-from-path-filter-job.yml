@@ -15,7 +15,7 @@ description: >
   depending on what folder.
 
   For example, you always want to do `gradle`, but sometimes you want to do
-  gradle build microservice-a and sometimes you want to do gradle microservice-b
+  gradle build microservice-a and sometimes you want to do gradle build microservice-b.
 
   Now, with path-filtering you would need to set up indidivdual pipeline parameters
   for each case and define seperate parts of the workflow, running using when statements.
