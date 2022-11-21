@@ -1,0 +1,109 @@
+description: >
+  Deploys a Helm chart, assumes image version of component is set in .microservice_version
+parameters:
+  app-name:
+    type: string
+    description: Name of application to deploy
+  environment:
+    type: string
+    description: Environment to deploy to
+  channel:
+    type: string
+    default: deploys-staging
+    description: Slack channel to send notifications to
+  component:
+    type: string
+    description: Name of folder that contains the Helm Chart
+  domain:
+    type: string
+    description: Domain (K8s namespace) to deploy to
+  fail:
+    type: string
+    default: <!subteam^SFNQZTE4Q> # The oncall subteam string is found from https://app.slack.com/client/T024JTSAP/DK3CTS2F4/user_groups
+    description: Message to be included in slack notification on failure
+  path:
+    type: string
+    description: Path to .chart folder of application
+  project-id-env-var:
+    type: string
+    default: GCLOUD_PROJECT_ID
+    description: Environment variable that contains the project ID to deploy to
+  short-region:
+    type: string
+    default: usc1
+    description: Short-region to deploy Compute Engine resources
+  region:
+    type: string
+    default: us-central1
+    description: Region to deploy Compute Engine resources
+  registry-region:
+    type: string
+    default: us-central1
+    description: Region of Artifact Registry
+  dry-run:
+    type: boolean
+    default: false
+    description: If enabled, simulate an upgrade
+executor:
+steps:
+- checkout
+- gcp-authorize:
+    environment-variable-name: GCLOUD_SERVICE_ACCOUNT
+    do-helm-login: 'true'
+- run:
+    name: Setting up ShuttleCrawler Google and K8 context
+    command: |
+      gcloud container clusters get-credentials \
+        platform-<< parameters.environment >>-<< parameters.region >>-cluster \
+        --zone << parameters.region >> \
+        --project ${<< parameters.project-id-env-var >>}
+- run:
+    name: Preparing Helm upgrade parameters
+    command: |
+      params=(--atomic --install --cleanup-on-fail --debug)
+      params+=("-f values.yaml")
+
+      # Apply environment-specific yaml if it exists
+      [[ -f << parameters.path >>/.chart/<< parameters.component >>/<< parameters.environment >>.yaml ]] && params+=("-f << parameters.environment >>.yaml")
+
+      params+=("--namespace=<< parameters.domain >>")
+      params+=("--set global.environment=<< parameters.environment >>")
+      params+=("--set global.projectId=${<< parameters.project-id-env-var >>}")
+      params+=("--set global.shortRegion=<< parameters.short-region >>")
+      params+=("--set global.region=<< parameters.region >>")
+      params+=("--set global.registryRegion=<< parameters.registry-region >>")
+      params+=("--set global.version=$(<.microservice_version)")
+      echo "export PARAMS=(${params[@]})" >> "$BASH_ENV"
+- run:
+    name: Building helm dependencies
+    working_directory: << parameters.path >>/.chart/<< parameters.component >>
+    command: |
+      echo "Building dependencies for the application '<< parameters.app-name >>-<< parameters.component >>'"
+      helm dependency build ./
+- when:
+    condition: << parameters.dry-run >>
+    steps:
+    - run:
+        name: Deploy and release (Dry-run)
+        working_directory: << parameters.path >>/.chart/<< parameters.component >>
+        command: |
+          echo "Dry-run of upgrading the application '<< parameters.app-name >>>-<< parameters.component >>' version: $(<.microservice_version)"
+          helm upgrade << parameters.app-name >>->-<< parameters.component >> ./ --dry-run "${PARAMS[@]}"
+- unless:
+    condition: << parameters.dry-run >>
+    steps:
+      - slack-circleci-build:
+          notify: "*starting deploy* of << parameters.app-name >>->-<< parameters.component >> to platform-<< parameters.environment >>"
+          channel: << parameters.channel >>
+          emoji: ':ship:'
+      - run:
+          name: Deploy and release
+          working_directory: << parameters.path >>/.chart/<< parameters.component >>
+          command: |
+            echo "Upgrading the application '<< parameters.app-name >>>-<< parameters.component >>' version: $(<.microservice_version)"
+            helm upgrade << parameters.app-name >>>-<< parameters.component >> ./ "${PARAMS[@]}"
+      - slack-circleci-build:
+          notify: "*finished deploy* of << parameters.app-name >>->-<< parameters.component >> to platform-<< parameters.environment >>"
+          channel: << parameters.channel >>
+          emoji: ':checkered_flag:'
+          fail: << parameters.fail >>
