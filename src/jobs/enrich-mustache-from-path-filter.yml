@@ -4,7 +4,7 @@
   # functionality OR find that Circle's official path-filtering orb
   # doesn't work for your use case anymore.
   #
-  # For exmaple, Circle's path-filtering works great if you want to turn on or off
+  # For example, Circle's path-filtering works great if you want to turn on or off
   # currently defined workflows or part of a pipeline. But if you have
   # a situation where you want to create many instances of the SAME
   # jobs, this is much harder to keep DRY.
