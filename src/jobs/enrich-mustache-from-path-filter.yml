@@ -15,7 +15,7 @@
   # path from path-filter
   #
   # Rules for parameters provided in the mappings section:
-  #   1. these must be JSON literals
+  #   1. These must be JSON literals
   #   2. If the JSON literal is an array [], if multiple matches are
   #      found then all the matched values will be concatinated in an array
   #   3. If a value is not marked as an array then subsequent sets will override
