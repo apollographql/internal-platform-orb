@@ -60,7 +60,7 @@ parameters:
 steps:
   - checkout
   - setup
-  - set-parameters:
+  - git-diff-set-parameters:
       base-revision: << parameters.base-revision >>
       output-path: << parameters.config-path >>
       mapping: << parameters.mapping >>
