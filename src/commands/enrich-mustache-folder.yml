@@ -1,0 +1,31 @@
+description: >-
+  Meant as a wrapper if you're using enrich-mustache with a folder full of fyaml.
+  Must run setup command first.
+parameters:
+  json-data-file-path:
+    type: string
+  template-folder-path:
+    type: string
+  output-folder-path:
+    type: string
+    description: destintation folder. This command will create folders your Circle fyaml expects
+  output-file-path:
+    type: string
+    description: where you want the packed
+steps:
+  - run:
+      name: install chevron
+      command: python3 -m pip install --user chevron
+  - run:
+      name: enrich-mustache
+      command: |
+        mkdir -p << parameters.output-folder-path >>
+        pushd << parameters.output-folder >>
+        mkdir jobs; mkdir commands; mkdir executors; mkdir parameters; mkdir workflows
+        popd
+
+        pushd << parameters.template-folder-path >>
+        find * -name '*.yml' -exec bash /tmp/apollo_internal_platform_orb/src/scripts/chevron_output_to_file.sh << parameters.json-data-file-path >> "{}"  \;
+  - run:
+      name: pack
+      command: circleci config pack << parameters.output-file-path >> > << parameters.output-file-path >>
