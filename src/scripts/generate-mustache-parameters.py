@@ -77,25 +77,32 @@ def check_mapping(m):
       return True
   return False
 
+# HERE IS THE DIVERGENCE FROM PATH-FILTERING
 def convert_mapping(accumulator, current):
+  """
+    arguments:
+      accumulator -- dictionary type. Keys and values will be passed to mustache to enrich template
+      current -- array of the last two values in the matching MAPPING line. aka will be ["build-what", "one"]
+  """
   parameter_name  = current[1]
   parameter_value = current[2]
 
   is_parameter_an_array = (parameter_value[0] == "[")
 
   if is_parameter_an_array:
-      parameter_array = accumulator.get(parameter_name, [])
-      parameter_value_array_value = json.loads(parameter_value)[0]
+    parameter_array = accumulator.get(parameter_name, [])
+    parameter_value_array_value = json.loads(parameter_value)[0]
 
-      parameter_array.append(parameter_value_array_value)
-      accumulator[parameter_name] = parameter_array
+    parameter_array.append(parameter_value_array_value)
+    accumulator[parameter_name] = parameter_array
   else:
-      accumulator[parameter_name] = json.loads(parameter_value)
+    accumulator[parameter_name] = json.loads(parameter_value)
 
   return accumulator
+# END DIVERGENCE FROM PATH-FILTERING
 
 mappings = filter(check_mapping, mappings)
-mappings = reduce(convert_mapping, mappings, {})
+mappings = reduce(convert_mapping, mappings, {})  # (I also changed this to a reduce function...)
 
 with open(output_path, 'w') as fp:
   fp.write(json.dumps(mappings))
