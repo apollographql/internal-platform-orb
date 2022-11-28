@@ -20,7 +20,7 @@ steps:
       name: enrich-mustache
       command: |
         mkdir -p << parameters.output-folder-path >>
-        pushd << parameters.output-folder >>
+        pushd << parameters.output-folder-path >>
         mkdir jobs; mkdir commands; mkdir executors; mkdir parameters; mkdir workflows
         popd
 
