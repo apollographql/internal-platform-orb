@@ -6,12 +6,18 @@ parameters:
     type: string
   template-folder-path:
     type: string
+    description: the path to your fyaml folder. Should include the folder name (ie config.fyaml)
   output-folder-path:
     type: string
     description: destintation folder. This command will create folders your Circle fyaml expects
   output-file-path:
     type: string
     description: where you want the packed
+  install-cci-cli:
+    type: enum
+    values: ["false", "true"]
+    default: "true"
+    description: will install the CircleCI cli (required)
 steps:
   - run:
       name: install chevron
@@ -26,6 +32,16 @@ steps:
 
         pushd << parameters.template-folder-path >>
         find * -name '*.yml' -exec bash /tmp/apollo_internal_platform_orb/src/scripts/chevron_output_to_file.sh << parameters.json-data-file-path >> "{}"  \;
+  - run:
+      name: install CircleCI cli
+      command: |
+          if [ "<< parameters.install-cci-cli >>" == "true" ]; then
+            echo "installing CircleCCI CLI"
+            export DESTDIR=/tmp/bin/
+            mkdir -p $DESTDIR
+            echo "export PATH=${DESTDIR}:"'${PATH}' >> $BASH_ENV
+            curl -fLSs https://raw.githubusercontent.com/CircleCI-Public/circleci-cli/master/install.sh | bash
+          fi
   - run:
       name: pack
       command: circleci config pack << parameters.output-file-path >> > << parameters.output-file-path >>
