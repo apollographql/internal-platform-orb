@@ -15,7 +15,7 @@ parameters:
     description: where you want the packed
   install-cci-cli:
     type: enum
-    values: ["false", "true"]
+    enum: ["false", "true"]
     default: "true"
     description: will install the CircleCI cli (required)
 steps:
