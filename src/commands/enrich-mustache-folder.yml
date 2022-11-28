@@ -44,4 +44,4 @@ steps:
           fi
   - run:
       name: pack
-      command: circleci config pack << parameters.output-file-path >> > << parameters.output-file-path >>
+      command: circleci config pack << parameters.output-folder-path >> > << parameters.output-file-path >>
