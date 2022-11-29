@@ -32,6 +32,7 @@ steps:
 
         pushd << parameters.template-folder-path >>
         find * -name '*.yml' -exec bash /tmp/apollo_internal_platform_orb/src/scripts/chevron_output_to_file.sh << parameters.json-data-file-path >> "<< parameters.output-folder-path >>" "{}"  \;
+        popd
   - run:
       name: install CircleCI cli
       command: |
