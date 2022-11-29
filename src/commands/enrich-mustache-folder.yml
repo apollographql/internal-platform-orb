@@ -12,7 +12,7 @@ parameters:
     description: destintation folder. This command will create folders your Circle fyaml expects
   output-file-path:
     type: string
-    description: where you want the packed
+    description: where you want the packed file to be
   install-cci-cli:
     type: enum
     enum: ["false", "true"]
