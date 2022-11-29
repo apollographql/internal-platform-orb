@@ -35,7 +35,7 @@ parameters:
       Like path-filtering, the format is:
         REGEX PARAMETER VALUE
 
-        (yes, space seperated values)
+        (space seperated values)
 
         For each line provided the results of git diff --name-only
         is examined for matches. This uses PCRE style regex, as defined in Python3
