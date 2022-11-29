@@ -44,7 +44,7 @@ parameters:
         see if matches REGEX. If it does the mustache parameter PARAMETER will be
         created, and given VALUE. (In Circle's path-filtering orb this sets pipeline parameters).
 
-        VALUE must be a JSON literal. For example: true, "hello", 2. Yes, you must include quotes.
+        VALUE must be a JSON literal. For example: true, "hello", 2. NOTE: You must include quotes.
 
         enrich-mustache-from-path-filter adds to this syntax in supporting appendable arrays.
         Given two mapping lines
