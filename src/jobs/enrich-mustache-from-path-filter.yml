@@ -53,7 +53,9 @@ parameters:
 
         if BOTH folder-one and folder-two have changed files the value of the build-what variable will be ["one", "two"].
 
-        This is special casing for arrays only. Scalar types will have path-filtering behavior: given two matches the last one wins. Which is the last one? Potentially undefined behavior.
+        This is special casing for arrays only. Scalar types will have
+        path-filtering behavior: given two matches the last one wins.
+        Which is the last one? Potentially undefined behavior.
 
 
     type: string
