@@ -85,18 +85,18 @@ def convert_mapping(accumulator, current):
       current -- array of the last two values in the matching MAPPING line. aka will be ["build-what", "one"]
   """
   parameter_name  = current[1]
-  parameter_value = current[2]
+  parameter_value = json.loads(current[2])
 
-  is_parameter_an_array = (parameter_value[0] == "[")
+  is_parameter_an_array = isinstance(parameter_value, list)
 
   if is_parameter_an_array:
     parameter_array = accumulator.get(parameter_name, [])
-    parameter_value_array_value = json.loads(parameter_value)[0]
+    parameter_value_array_value = parameter_value[0]
 
     parameter_array.append(parameter_value_array_value)
     accumulator[parameter_name] = parameter_array
   else:
-    accumulator[parameter_name] = json.loads(parameter_value)
+    accumulator[parameter_name] = parameter_value
 
   return accumulator
 # END DIVERGENCE FROM PATH-FILTERING
