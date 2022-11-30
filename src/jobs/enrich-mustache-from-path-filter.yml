@@ -60,8 +60,7 @@ parameters:
     type: string
 steps:
   - checkout
-  - setup:
-      download-reference: rwilcox%2Fadd-enrich-filtering-job
+  - setup
   - git-diff-set-parameters:
       base-revision: << parameters.base-revision >>
       output-path: << parameters.config-path >>
