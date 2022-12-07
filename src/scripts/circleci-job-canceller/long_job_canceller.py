@@ -19,6 +19,7 @@ standard_headers = {}
 job_life_clock = datetime.timedelta(hours=2)
 job_midlife_warning = datetime.timedelta(hours=1)
 
+robot_committers = ["apollo-bot2"]
 
 def get_workflow_started_by(current_workflow):
     user_url = f"https://circleci.com/api/v2/user/{current_workflow['started_by']}"
@@ -40,6 +41,9 @@ def find_old_workflow_ids(repo_slug):
 
               if ( (created_at < (now - job_midlife_warning)) and (created_at > (now - job_life_clock))):
                   username = get_workflow_started_by(current_workflow)
+                  if username in robot_committers:
+                      continue
+
                   yield { "job_status": "age_warning", "name": current_workflow['name'], "id": current_workflow['id'], "username": username }
 
               if (created_at < (now - job_life_clock)):

@@ -17,6 +17,7 @@ from dateutil.parser import *
 
 
 oncall_subteam = "<!subteam^SFNQZTE4Q>"
+robot_committers = ["apollo-bot2"]
 
 leave_pending_jobs_for = datetime.timedelta(hours=1)
 
@@ -47,6 +48,13 @@ def make_graphql_query(githubtoken, orgreposlug):
              user {
                login
              }
+            }
+            associatedPullRequests(first:1) {
+              nodes {
+                mergedBy {
+                  login
+                }
+              }
             }
           }
         }
@@ -99,6 +107,10 @@ def main(githubtoken, orgreposlug, circleapitoken):
     commit_url = commit_info.get("commitUrl")
     author = commit_info.get("author").get("user").get("login")
 
+    if author in robot_committers:
+        # don't blame the robot, blame the person who merged it
+        author = commit_info.get("associatedPullRequests").get("nodes")[0].get("mergedBy").get("login")
+
     if (commit_state == "PENDING"):
         # This is a slightly more targetted nudge than what log_job_canceller does as it's ONLY for head of main
         # (but _technically_ duplicated reminders)
@@ -116,7 +128,7 @@ def main(githubtoken, orgreposlug, circleapitoken):
             # we might have a situation where the job is already cancelled, but the Github build status indicator doesn't reflect that
             # so, if there's a workflow ID, use it to get the _real_ status of the job. If it is cancelled, well thanks other robot?
             if "/workflow-run/" in workflow_link:
-                workflow_id = re.search("https://circleci.com/workflow-run/(.+)\?", workflow_link).group(1)
+                workflow_id = re.search("https://circleci.com/workflow-run/(.+).*", workflow_link).group(1)
 
             if workflow_id and circleapitoken:
                 api_url = f"https://circleci.com/api/v2/workflow/{workflow_id}"
@@ -132,7 +144,37 @@ def main(githubtoken, orgreposlug, circleapitoken):
                 print(f"Hey *gh:{author}*! Looks like your merge has spent some time in _staging_ to be tested. Go to *prod* :question: :link: <{workflow_link}|View on CircleCI>. - :heart: :canned_food:.")
 
     if (commit_state == "FAILURE"):
-        print(f"Recent checks have found monorepo main is broken. Latest commit {commit_url} by gh:{author}. {oncall_subteam}")
+        # if a branch was created but nothing pushed to it, failures from that branch may affect this commit (as the commit is both head of main and head of that branch)
+        # gather up failed statuses from circle
+        # note for Circle build statuses these are likely job IDs, not workflow-runs
+
+        failed_jobs = []
+        [ failed_jobs.append(x) for x in commit_info.get("status").get("contexts") if ((x.get("state") == "FAILURE") and ("ci/circleci" in x.get("context"))) ]
+
+        main_has_failed_checks = False
+
+        for current in failed_jobs:
+            # extract the job id
+
+            circle_job_id_results = re.search(f"https://circleci.com/gh/{orgreposlug}/(\d+)", current['targetUrl'])
+            if circle_job_id_results:
+                job_id = circle_job_id_results.group(1)
+
+                standard_headers = {"Circle-Token": circleapitoken}
+                api_url = f"https://circleci.com/api/v2/project/gh/{orgreposlug}/job/{job_id}"
+
+                workflow_info = requests.get(api_url, headers=standard_headers).json()
+                pipeline_id = workflow_info["pipeline"]["id"]
+
+                pipeline_info = requests.get(f"https://circleci.com/api/v2/pipeline/{pipeline_id}", headers=standard_headers).json()
+                #print(pipeline_info)
+
+                failed_branch = pipeline_info["vcs"]["branch"]
+                if failed_branch == "main":
+                    main_has_failed_checks = True
+
+        if main_has_failed_checks:
+            print(f"Recent checks have found monorepo main is broken. Latest commit {commit_url} by gh:{author}. {oncall_subteam}")
 
 
 if __name__ == "__main__":
@@ -145,7 +187,6 @@ if __name__ == "__main__":
     #   * repo repo:status
 
     parser.add_argument("orgreposlug", help="the location, user-or-org/repository-name , of this repository")
-
     parser.add_argument("--circleapitoken", default=None, type=str, help="the CircleCI API token for this script")
 
     args = parser.parse_args()
