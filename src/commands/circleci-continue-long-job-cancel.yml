@@ -35,7 +35,7 @@ steps:
              circleci-agent step halt
           fi
   - continuation/continue:
-        configuration_path: /tmp/circle/warn-workflow-$CIRCLE_WORKFLOW_JOB_ID.yml
+        configuration_path: "/tmp/circle/warn-workflow-$CIRCLE_WORKFLOW_JOB_ID.yml"
         parameters: /tmp/circle/warn-workflow-params.json
   - store_artifacts:
         path: /tmp/circle/
