@@ -25,17 +25,17 @@ steps:
       command: |
         python3 -m pip install -r requirements.txt
         mkdir -p /tmp/circle/
-        python3 render-yaml-from-tsv.py "<< parameters.render-workflow-yml-file-path >>" /tmp/notifications.tsv  > /tmp/circle/warn-workflow.yml
+        python3 render-yaml-from-tsv.py "<< parameters.render-workflow-yml-file-path >>" /tmp/notifications.tsv  > /tmp/circle/warn-workflow-$CIRCLE_WORKFLOW_JOB_ID.yml
         echo "{}" > /tmp/circle/warn-workflow-params.json
   - run:
       name: Halt if no warning changes
       command: |
-          if [ ! -s /tmp/circle/warn-workflow.yml ]
+          if [ ! -s /tmp/circle/warn-workflow-$CIRCLE_WORKFLOW_JOB_ID.yml ]
           then
              circleci-agent step halt
           fi
   - continuation/continue:
-        configuration_path: /tmp/circle/warn-workflow.yml
+        configuration_path: /tmp/circle/warn-workflow-$CIRCLE_WORKFLOW_JOB_ID.yml
         parameters: /tmp/circle/warn-workflow-params.json
   - store_artifacts:
         path: /tmp/circle/
