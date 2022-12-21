@@ -15,10 +15,6 @@ parameters:
     description: the name used for the rendered workflow
     default: "warn-workflow.yml"
     type: string
-  rendered-workflow-params:
-    description: parameters to pass in for the rendered workflow
-    default: "{}"
-    type: string
 
 steps:
   - run:
@@ -34,7 +30,7 @@ steps:
         python3 -m pip install -r requirements.txt
         mkdir -p /tmp/circle/
         python3 render-yaml-from-tsv.py "<< parameters.render-workflow-yml-file-path >>" /tmp/notifications.tsv  > /tmp/circle/<< parameters.rendered-workflow-name >>
-        echo << parameters.rendered-workflow-params >> > /tmp/circle/warn-workflow-params.json
+        echo "{}" > /tmp/circle/warn-workflow-params.json
   - run:
       name: Halt if no warning changes
       command: |
