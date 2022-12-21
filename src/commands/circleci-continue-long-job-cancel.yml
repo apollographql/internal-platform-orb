@@ -11,6 +11,10 @@ parameters:
     description: the name of the environmental variable that contains the circleci token
     default: "CIRCLECI_TOKEN"
     type: string
+  rendered-workflow-name:
+    description: the name used for the rendered workflow
+    default: "warn-workflow-$CIRCLE_WORKFLOW_JOB_ID"
+    type: string
 
 steps:
   - run:
@@ -25,17 +29,17 @@ steps:
       command: |
         python3 -m pip install -r requirements.txt
         mkdir -p /tmp/circle/
-        python3 render-yaml-from-tsv.py "<< parameters.render-workflow-yml-file-path >>" /tmp/notifications.tsv  > /tmp/circle/warn-workflow-$CIRCLE_WORKFLOW_JOB_ID.yml
+        python3 render-yaml-from-tsv.py "<< parameters.render-workflow-yml-file-path >>" /tmp/notifications.tsv  > /tmp/circle/<< parameters.rendered-workflow-name >>
         echo "{}" > /tmp/circle/warn-workflow-params.json
   - run:
       name: Halt if no warning changes
       command: |
-          if [ ! -s /tmp/circle/warn-workflow-$CIRCLE_WORKFLOW_JOB_ID.yml ]
+          if [ ! -s /tmp/circle/<< parameters.rendered-workflow-name >> ]
           then
              circleci-agent step halt
           fi
   - continuation/continue:
-        configuration_path: "/tmp/circle/warn-workflow-$CIRCLE_WORKFLOW_JOB_ID.yml"
+        configuration_path: /tmp/circle/<< parameters.rendered-workflow-name >>
         parameters: /tmp/circle/warn-workflow-params.json
   - store_artifacts:
         path: /tmp/circle/
