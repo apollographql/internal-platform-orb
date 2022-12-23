@@ -28,7 +28,7 @@ steps:
       command: |
         PARAMETERS_CHANNEL="<< parameters.channel >>"
         echo "export NOTIFICATION_CHANNEL=${PARAMETERS_CHANNEL:-$CHANNEL}" >> $BASH_ENV
-        echo "export NOTIFICATION_LINK="<< parameters.link >>" >> $BASH_ENV
+        echo "export NOTIFICATION_LINK=\"<< parameters.link >>\"" >> $BASH_ENV
   - run:
       name: Verify input...
       command: |
