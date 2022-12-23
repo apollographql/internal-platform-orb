@@ -21,13 +21,14 @@ parameters:
     description: Textual reference for a prefixed emoji to be formatted into the message to Slack.
   link:
     type: string
-    default: 'https://app.circleci.com/pipelines/workflows/$CIRCLE_WORKFLOW_ID'
+    default: "https://app.circleci.com/pipelines/workflows/$CIRCLE_WORKFLOW_ID"
 steps:
   - run:
       name: Init...
       command: |
         PARAMETERS_CHANNEL="<< parameters.channel >>"
         echo "export NOTIFICATION_CHANNEL=${PARAMETERS_CHANNEL:-$CHANNEL}" >> $BASH_ENV
+        echo "export NOTIFICATION_LINK="<< parameters.link >>" >> $BASH_ENV
   - run:
       name: Verify input...
       command: |
@@ -45,7 +46,7 @@ steps:
             "type": "section",
             "text": {
               "type": "mrkdwn",
-              "text": "<< parameters.emoji >> *gh:$CIRCLE_USERNAME* in ghrepo:$CIRCLE_PROJECT_REPONAME: << parameters.notify >> :link: <<< parameters.link >>|View on CircleCI>. <https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/commit/$CIRCLE_SHA1|View on Github>"
+              "text": "<< parameters.emoji >> *gh:$CIRCLE_USERNAME* in ghrepo:$CIRCLE_PROJECT_REPONAME: << parameters.notify >> :link: <$NOTIFICATION_LINK|View on CircleCI>. <https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/commit/$CIRCLE_SHA1|View on Github>"
             }
           }]
         }
