@@ -59,6 +59,7 @@ workflows:
           github-token: GH_BOT_KEY
           context:
             - orb-publishing
+            - github-orb
           requires:
             - orb-tools/lint
             - orb-tools/pack
