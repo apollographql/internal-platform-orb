@@ -22,6 +22,10 @@ parameters:
   link:
     type: string
     default: "https://app.circleci.com/pipelines/workflows/$CIRCLE_WORKFLOW_ID"
+  who-did-it:
+    type: string
+    description: Who did the action
+    default: "gh:$CIRCLE_USERNAME"
 steps:
   - run:
       name: Init...
@@ -46,7 +50,7 @@ steps:
             "type": "section",
             "text": {
               "type": "mrkdwn",
-              "text": "<< parameters.emoji >> *gh:$CIRCLE_USERNAME* in ghrepo:$CIRCLE_PROJECT_REPONAME: << parameters.notify >> :link: <$NOTIFICATION_LINK|View on CircleCI>. <https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/commit/$CIRCLE_SHA1|View on Github>"
+              "text": "<< parameters.emoji >> *<< parameters.who-did-it >>* in ghrepo:$CIRCLE_PROJECT_REPONAME: << parameters.notify >> :link: <$NOTIFICATION_LINK|View on CircleCI>. <https://github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/commit/$CIRCLE_SHA1|View on Github>"
             }
           }]
         }
