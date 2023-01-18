@@ -16,13 +16,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.11] - 2023-01-03
 
-
 ### Changed
   - slack-circleci-build has an optional link parameter in case the default Circle URL does not work for your use case
 
 
 ## [1.0.10] - 2022-12-07
-
 
 ### Changed
   - the long job canceller script has the following changes:
@@ -34,6 +32,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
   - build fix
+
 
 ## [1.0.7] - 2023-11-30
 ### Added
