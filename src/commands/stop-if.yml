@@ -1,0 +1,18 @@
+description: >-
+  Helper command which will `halt` the entire execution of the running `job` if the value of
+  tested parameter is the value of the expectation parameter
+
+parameters:
+  tested:
+    type: string
+  expectation:
+    type: string
+
+steps:
+  - run:
+      name: Halt if tested = expectation
+      command: |
+        if [ "<< parameters.tested >>" = "<< parameters.expectation >>" ];
+        then
+          circleci-agent step halt
+        fi
