@@ -1,6 +1,6 @@
 description: >-
   Helper command which will `halt` the entire execution of the running `job` if the value of
-  tested parameter is the value of the expectation parameter.
+  `value` parameter is the value of the `stop-if-value-is` parameter.
 
   Circle's "when" conditions are great, but you could use this as a pre-step in a workflow to avoid executing a job
 
