@@ -2,19 +2,19 @@ description: >-
   Helper command which will `halt` the entire execution of the running `job` if the value of
   tested parameter is the value of the expectation parameter.
 
-  when conditions are great, but you could use this as a pre-step in a workflow to avoid executing a job
+  Circle's "when" conditions are great, but you could use this as a pre-step in a workflow to avoid executing a job
 
 parameters:
-  tested:
+  value:
     type: string
-  expectation:
+  halt-if-value-is:
     type: string
 
 steps:
   - run:
-      name: Halt if tested = expectation
+      name: Halt if actual = expected
       command: |
-        if [ "<< parameters.tested >>" = "<< parameters.expectation >>" ];
+        if [ "<< parameters.value >>" = "<< parameters.halt-if-value-is >>" ];
         then
           circleci-agent step halt
         fi
