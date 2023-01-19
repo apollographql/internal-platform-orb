@@ -60,18 +60,6 @@ def find_old_workflow_ids(repo_slug, window_start, window_end, headers):
                     yield {"job_status": "too_old", "name": current_workflow['name'], "id": current_workflow['id'], "username": username}
 
 
-def cancel_pipeline(pipeline, workflows):
-    for workflow in workflows:
-        if not workflow.get('stopped_at'):
-            print(
-                f'    Cancelling workflow: https://app.circleci.com/pipelines/{pipeline["project_slug"]}/{pipeline["number"]}/workflows/{workflow["id"]}')
-            response = requests.post(
-                f"https://circleci.com/api/v2/workflow/{current_info['id']}/cancel", headers=standard_headers)
-
-            if not response['message'] == 'Accepted.':
-                raise Exception(f'{response}')
-
-
 def main(circleapitoken, orgreposlug, output_file, commit):
     standard_headers = {"Circle-Token": circleapitoken}
 
