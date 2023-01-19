@@ -10,7 +10,7 @@ parameters:
     description: A value - maybe even a Circle parameter - to check
   stop-if-value-is:
     type: string
-    description: If the value parameter is this value, halt job execution. Job will still be green, but further steps will not happen
+    description: If the value parameter matches this value, halt job execution. Job will still be green, but further steps will not happen
 
 steps:
   - run:
