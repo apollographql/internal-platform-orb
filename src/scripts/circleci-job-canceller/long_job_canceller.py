@@ -60,6 +60,46 @@ def find_old_workflow_ids(repo_slug, window_start, window_end, headers):
                     yield {"job_status": "too_old", "name": current_workflow['name'], "id": current_workflow['id'], "username": username}
 
 
+def cancel_pipeline(pipeline, workflows):
+    for workflow in workflows:
+        if not workflow.get('stopped_at'):
+            print(
+                f'    Cancelling workflow: https://app.circleci.com/pipelines/{pipeline["project_slug"]}/{pipeline["number"]}/workflows/{workflow["id"]}')
+            response = requests.post(
+                f"https://circleci.com/api/v2/workflow/{current_info['id']}/cancel", headers=standard_headers)
+
+            if not response['message'] == 'Accepted.':
+                raise Exception(f'{response}')
+
+
+def main(circleapitoken, orgreposlug, output_file, commit):
+    standard_headers = {"Circle-Token": circleapitoken}
+
+    simple_path = os.path.abspath(os.path.expanduser(
+        os.path.expandvars(output_file)))
+
+    with open(simple_path, 'w') as f:
+        f.write("job_status\tproceed\tid\tusername\tname\n")
+        for current_info in find_old_workflow_ids(
+            orgreposlug,
+            now - (job_life_clock * 5),
+            now - job_midlife_warning,
+            standard_headers
+        ):
+            if current_info["job_status"] == "age_warning":
+                print(
+                    f"midlife warning for workflow ({current_info['name']}), started by gh:{current_info['username']}. See more info at: https://app.circleci.com/pipelines/workflows/{current_info['id']}")
+            else:
+                print(
+                    f"found too old workflow: {current_info['id']} ({current_info['name']}) See more info at: https://app.circleci.com/pipelines/workflows/{current_info['id']}")
+                if commit:
+                    requests.post(
+                        f"https://circleci.com/api/v2/workflow/{current_info['id']}/cancel", headers=standard_headers)
+
+            f.write(
+                f"{current_info['job_status']}\ttrue\t{current_info['id']}\t{current_info['username']}\t{current_info['name']}\n")
+
+
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
@@ -69,31 +109,9 @@ if __name__ == "__main__":
 
     parser.add_argument("--output-file", help="output to file path",
                         default="/tmp/notifications.tsv", )
-    parser.add_argument("--just-do-it", help="just cancel jobs",
+    parser.add_argument("--commit", help="just cancel jobs",
                         default=False, action="store_true")
 
     args = parser.parse_args()
 
-    CIRCLE_API_KEY = args.circleapitoken
-    cancel_jobs_here = args.just_do_it
-
-    standard_headers = {"Circle-Token": args.circleapitoken}
-
-    simple_path = os.path.abspath(os.path.expanduser(
-        os.path.expandvars(args.output_file)))
-
-    with open(simple_path, 'w') as f:
-        f.write("job_status\tproceed\tid\tusername\tname\n")
-        for current_info in find_old_workflow_ids(args.orgreposlug, standard_headers):
-            if current_info["job_status"] == "age_warning":
-                print(
-                    f"midlife warning for workflow ({current_info['name']}), started by gh:{current_info['username']}. See more info at: https://app.circleci.com/pipelines/workflows/{current_info['id']}")
-            else:
-                print(
-                    f"found too old workflow: {current_info['id']} ({current_info['name']}) See more info at: https://app.circleci.com/pipelines/workflows/{current_info['id']}")
-                if cancel_jobs_here:
-                    requests.post(
-                        f"https://circleci.com/api/v2/workflow/{current_info['id']}/cancel", headers=standard_headers)
-
-            f.write(
-                f"{current_info['job_status']}\ttrue\t{current_info['id']}\t{current_info['username']}\t{current_info['name']}\n")
+    main(args.circleapitoken, args.orgreposlug, args.output_file, args.commit)
