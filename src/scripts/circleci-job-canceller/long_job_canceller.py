@@ -15,6 +15,8 @@ sys.path.append("..")  # added!
 
 job_life_clock = datetime.timedelta(hours=2)
 job_midlife_warning = datetime.timedelta(hours=1)
+utc_tz = datetime.timezone(datetime.timedelta(hours=0))
+now = datetime.datetime.now(utc_tz)
 
 robot_committers = ["apollo-bot2"]
 
@@ -28,12 +30,18 @@ def get_workflow_started_by(current_workflow, headers):
     return username
 
 
-def find_old_workflow_ids(repo_slug, headers):
-    utc_tz = datetime.timezone(datetime.timedelta(hours=0))
-    now = datetime.datetime.now(utc_tz)
+def find_old_workflow_ids(repo_slug, window_start, window_end, headers):
+    print(f'Window to paginate through: [{window_start}, {window_end}]')
+    for current_pipeline in get_all_items(f"/project/gh/{repo_slug}/pipeline", headers, None):
+        # Paginate through only those pipelines which started inside our given window
+        if str(window_end) < current_pipeline['created_at']:
+            print(f'Pipeline too young: {current_pipeline["created_at"]}')
+            continue
+        if current_pipeline['created_at'] < str(window_start):
+            print(f'Pipeline too old: {current_pipeline["created_at"]}')
+            return None
 
-    for current_pipeline in get_all_items(f"/project/gh/{repo_slug}/pipeline", headers):
-        for current_workflow in get_all_items(f"/pipeline/{current_pipeline['id']}/workflow", headers):
+        for current_workflow in get_all_items(f"/pipeline/{current_pipeline['id']}/workflow", headers, None):
             if current_workflow["status"] == "on_hold":
                 created_at_str = current_workflow["created_at"]
                 created_at = isoparse(created_at_str)
