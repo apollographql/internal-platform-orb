@@ -7,14 +7,14 @@ description: >-
 parameters:
   value:
     type: string
-  halt-if-value-is:
+  stop-if-value-is:
     type: string
 
 steps:
   - run:
       name: Halt if actual = expected
       command: |
-        if [ "<< parameters.value >>" = "<< parameters.halt-if-value-is >>" ];
+        if [ "<< parameters.value >>" = "<< parameters.stop-if-value-is >>" ];
         then
           circleci-agent step halt
         fi
