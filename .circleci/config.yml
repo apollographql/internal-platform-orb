@@ -95,6 +95,8 @@ workflows:
               ignore: /v.*/
             branches:
               only: main
+          context:
+            - github-orb
 
   release-orb:
     jobs:
