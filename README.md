@@ -21,6 +21,7 @@ Important note: this is not an officially supported project of Apollo GraphQL. Y
 
 If you do have [issues](https://github.com/apollographql/internal-platform-orb/issues), or[pull requests](https://github.com/apollographql/internal-platform-orb/pulls) feel free, but...
 
+Also please add an entry to the changelog!
 
 ### How to test PRs
 1. Create and push a branch with your new features.
