@@ -21,6 +21,13 @@ parameters:
     type: string
     default: "dev:alpha"
 
+commands:
+  is-changelog-modified:
+    steps:
+      - run:
+          name: Did you update the CHANGELOG with this branch's modifications?
+          command: git diff main...HEAD --name-only | grep CHANGELOG
+
 jobs:
   # Define one or more jobs which will utilize your orb's commands and parameters to validate your changes.
   integration-test-1:
@@ -39,6 +46,12 @@ jobs:
             - "60:6b:bb:7e:68:74:ef:e1:ad:c0:50:e3:ee:14:44:d0"
       - nextgen-versioning/git-tag:
           tag-type: ''
+  apollo-checks:
+    docker:
+      - image: cimg/base:stable
+    steps:
+      - checkout
+      - is-changelog-modified
 
 workflows:
   test-pack:
@@ -49,6 +62,7 @@ workflows:
       - shellcheck/check:
           dir: ./src/scripts
           exclude: SC2148,SC2001,SC1091,SC2086,SC2116,SC2046,SC2005,SC2002
+      - apollo-checks
       # optional: Run BATS tests against your scripts
       # Publish development version(s) of the orb.
       - orb-tools/publish:
