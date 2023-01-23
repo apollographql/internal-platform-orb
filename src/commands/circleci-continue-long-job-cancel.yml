@@ -18,7 +18,7 @@ steps:
       working_directory: /tmp/apollo_internal_platform_orb/src/scripts/circleci-job-canceller
       command: |
         python3 -m pip install -r requirements.txt
-        python3 long_job_canceller.py $<< parameters.circleci-token-variable >> << parameters.org-repo-slug >> --just-do-it
+        python3 long_job_canceller.py $<< parameters.circleci-token-variable >> << parameters.org-repo-slug >> --commit
   - run:
       name: Spawn workflow jobs for warnings
       working_directory: /tmp/apollo_internal_platform_orb/src/scripts/render-yaml-from-tsv
