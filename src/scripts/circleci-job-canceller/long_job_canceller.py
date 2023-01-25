@@ -30,6 +30,17 @@ def get_workflow_started_by(current_workflow, headers):
     return username
 
 
+def get_workflow_pending_approval_jobs(workflow_id, headers):
+    url = f"https://circleci.com/api/v2/workflow/{workflow_id}/job"
+    workflow_info = requests.get(url, headers=headers).json()
+
+    all_jobs = workflow_info.get("items")
+    output = []
+
+    [ output.append(x) for x in all_jobs if (x.get("type") == "approval") and (x.get("status") == "on_hold") ]
+    return output
+
+
 def find_old_workflow_ids(repo_slug, window_start, window_end, headers):
     print(f'Window to paginate through: [{window_start}, {window_end}]')
     for current_pipeline in get_all_items(f"/project/gh/{repo_slug}/pipeline", headers, None):
@@ -60,7 +71,7 @@ def find_old_workflow_ids(repo_slug, window_start, window_end, headers):
                     yield {"job_status": "too_old", "name": current_workflow['name'], "id": current_workflow['id'], "username": username}
 
 
-def main(circleapitoken, orgreposlug, output_file, commit):
+def main(circleapitoken, orgreposlug, output_file, commit, ignore):
     standard_headers = {"Circle-Token": circleapitoken}
 
     simple_path = os.path.abspath(os.path.expanduser(
@@ -99,7 +110,8 @@ if __name__ == "__main__":
                         default="/tmp/notifications.tsv", )
     parser.add_argument("--commit", help="just cancel jobs",
                         default=False, action="store_true")
+    parser.add_argument("--ignore", help="ignore steps that contain this word", default="")
 
     args = parser.parse_args()
 
-    main(args.circleapitoken, args.orgreposlug, args.output_file, args.commit)
+    main(args.circleapitoken, args.orgreposlug, args.output_file, args.commit, args.ignore)
