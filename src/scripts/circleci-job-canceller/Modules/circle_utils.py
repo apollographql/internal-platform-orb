@@ -8,6 +8,10 @@ def get_all_items(relative_url, headers, pagination_limit=5):
     pages_iterated = 0
     while True:
         res = requests.get(temp_url, headers=headers).json()
+        if (res.get("message") == 'An internal server error occurred.'):
+            print("Circle side error hit")
+            break
+
         try:
             # delegates iteration to the (list), so returns 1 by one...
             yield from res["items"]
