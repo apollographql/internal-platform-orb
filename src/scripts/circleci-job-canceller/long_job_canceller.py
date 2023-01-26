@@ -5,6 +5,8 @@ import requests
 import datetime
 import sys
 import os.path
+import pprint
+import itertools
 
 from dateutil.parser import *
 
@@ -31,6 +33,12 @@ def get_workflow_started_by(current_workflow, headers):
 
 
 def get_workflow_pending_approval_jobs(workflow_id, headers):
+    """
+    the top object of the workflow only tells us that the workflow is on hold, not why.
+    Iterate through all the jobs of the workflow checking in particular for approval jobs
+    and return information about approval jobs in this workflow that are on hold
+    (so then we can filter them later)
+    """
     url = f"https://circleci.com/api/v2/workflow/{workflow_id}/job"
     workflow_info = requests.get(url, headers=headers).json()
 
@@ -69,6 +77,18 @@ def find_old_workflow_ids(repo_slug, window_start, window_end, headers):
                     username = get_workflow_started_by(
                         current_workflow, headers)
                     yield {"job_status": "too_old", "name": current_workflow['name'], "id": current_workflow['id'], "username": username}
+
+
+def do_we_care_about_this_pipeline(current_info, ignore, headers):
+    if ignore == "":
+        return True
+
+    pending_approvals = get_workflow_pending_approval_jobs(current_info['id'], headers)
+
+    # we want to know if all of the names of the approval jobs waiting contain the ignore keyword
+    # if all of them do, then we do NOT care about this pipeline
+    not_ignored_jobs = itertools.dropwhile( lambda x: x['name'].find(ignore) > -1 , pending_approvals )
+    return ( len(list(not_ignored_jobs)) > 0 )
 
 
 def main(circleapitoken, orgreposlug, output_file, commit, ignore):
