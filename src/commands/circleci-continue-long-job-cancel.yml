@@ -11,6 +11,10 @@ parameters:
     description: the name of the environmental variable that contains the circleci token
     default: "CIRCLECI_TOKEN"
     type: string
+  ignore-jobs-with-name:
+    description: do not warn people about jobs with this name
+    type: string
+    default: ""
 
 steps:
   - run:
@@ -18,7 +22,7 @@ steps:
       working_directory: /tmp/apollo_internal_platform_orb/src/scripts/circleci-job-canceller
       command: |
         python3 -m pip install -r requirements.txt
-        python3 long_job_canceller.py $<< parameters.circleci-token-variable >> << parameters.org-repo-slug >> --commit
+        python3 long_job_canceller.py $<< parameters.circleci-token-variable >> << parameters.org-repo-slug >> --commit --ignore=<< parameters.ignore-jobs-with-name >>
   - run:
       name: Spawn workflow jobs for warnings
       working_directory: /tmp/apollo_internal_platform_orb/src/scripts/render-yaml-from-tsv
