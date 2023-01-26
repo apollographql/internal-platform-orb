@@ -2,12 +2,24 @@ import requests
 import pprint
 
 
+def http_get(url, headers):
+    response = requests.get(url, headers=headers)
+    response.raise_for_status()
+    return response
+
+
+def http_post(url, headers):
+    response = requests.post(url, headers=headers)
+    response.raise_for_status()
+    return response
+
+
 def get_all_items(relative_url, headers, pagination_limit=5):
     url = f"https://circleci.com/api/v2{relative_url}"
     temp_url = str(url)
     pages_iterated = 0
     while True:
-        res = requests.get(temp_url, headers=headers).json()
+        res = http_get(temp_url, headers=headers).json()
         try:
             # delegates iteration to the (list), so returns 1 by one...
             yield from res["items"]

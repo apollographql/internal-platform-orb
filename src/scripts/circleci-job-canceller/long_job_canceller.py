@@ -23,7 +23,7 @@ robot_committers = ["apollo-bot2"]
 
 def get_workflow_started_by(current_workflow, headers):
     user_url = f"https://circleci.com/api/v2/user/{current_workflow['started_by']}"
-    user_info = requests.get(user_url, headers=headers).json()
+    user_info = http_get(user_url, headers=headers).json()
     # the Github / CircleCI scheduling bot won't have a username (JSON body will be {'message': 'Not found.'})
     username = user_info.get("login", "")
 
@@ -81,7 +81,7 @@ def main(circleapitoken, orgreposlug, output_file, commit):
                 print(
                     f"found too old workflow: {current_info['id']} ({current_info['name']}) See more info at: https://app.circleci.com/pipelines/workflows/{current_info['id']}")
                 if commit:
-                    requests.post(
+                    http_post(
                         f"https://circleci.com/api/v2/workflow/{current_info['id']}/cancel", headers=standard_headers)
 
             f.write(
