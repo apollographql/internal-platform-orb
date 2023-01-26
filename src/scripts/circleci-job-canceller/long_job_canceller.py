@@ -88,7 +88,11 @@ def do_we_care_about_this_pipeline(current_info, ignore, headers):
     # we want to know if all of the names of the approval jobs waiting contain the ignore keyword
     # if all of them do, then we do NOT care about this pipeline
     not_ignored_jobs = itertools.dropwhile( lambda x: x['name'].find(ignore) > -1 , pending_approvals )
-    return ( len(list(not_ignored_jobs)) > 0 )
+
+    amount_we_still_care_about = len(list(not_ignored_jobs))
+    output = amount_we_still_care_about > 0
+    print(f"Workflow initially had {len(pending_approvals)} approval jobs, {amount_we_still_care_about} we care about")
+    return ( output )
 
 
 def main(circleapitoken, orgreposlug, output_file, commit, ignore):
@@ -106,6 +110,10 @@ def main(circleapitoken, orgreposlug, output_file, commit, ignore):
             standard_headers
         ):
             if current_info["job_status"] == "age_warning":
+
+                if not do_we_care_about_this_pipeline(current_info, ignore, standard_headers):
+                    print("we do not care about this pipeline")
+                    continue
                 print(
                     f"midlife warning for workflow ({current_info['name']}), started by gh:{current_info['username']}. See more info at: https://app.circleci.com/pipelines/workflows/{current_info['id']}")
             else:
