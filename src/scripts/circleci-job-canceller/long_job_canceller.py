@@ -29,15 +29,24 @@ def get_workflow_started_by(current_workflow, headers):
     return username
 
 
+def pipeline_created_at_to_datetime(pipeline):
+    '''
+    Pipeline's create_at value is in ISO 8601 format: Y-m-dTH:M:S.fZ, convert to a
+    datetime.
+    '''
+    return datetime.datetime.fromisoformat(pipeline['created_at'][:-1])
+
+
 def find_old_workflow_ids(repo_slug, window_start, window_end, headers):
     print(f'Window to paginate through: [{window_start}, {window_end}]')
     for current_pipeline in get_all_items(f"/project/gh/{repo_slug}/pipeline", headers, None):
         # Paginate through only those pipelines which started inside our given window
-        if str(window_end) < current_pipeline['created_at']:
-            print(f'Pipeline too young: {current_pipeline["created_at"]}')
+        created_at = pipeline_created_at_to_datetime(current_pipeline)
+        if window_end < created_at:
+            print(f'Pipeline too young: {created_at}')
             continue
-        if current_pipeline['created_at'] < str(window_start):
-            print(f'Pipeline too old: {current_pipeline["created_at"]}')
+        if created_at < window_start:
+            print(f'Pipeline too old: {created_at}')
             return None
 
         for current_workflow in get_all_items(f"/pipeline/{current_pipeline['id']}/workflow", headers, None):
