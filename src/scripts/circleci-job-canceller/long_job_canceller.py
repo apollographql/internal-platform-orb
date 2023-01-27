@@ -89,18 +89,24 @@ def main(circleapitoken, orgreposlug, n_windows, output_file, commit):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "circleapitoken", help="the CircleCI API token for this script")
-    parser.add_argument(
-        "orgreposlug", help="the location, user-or-org/repository-name , of this repository")
+    parser.add_argument("circleapitoken",
+                        help="the CircleCI API token for this script")
+    parser.add_argument("orgreposlug",
+                        help="the location, user-or-org/repository-name , of this repository")
 
-    parser.add_argument("--output-file", help="output to file path",
-                        default="/tmp/notifications.tsv", )
-    parser.add_argument("--commit", help="just cancel jobs",
-                        default=False, action="store_true")
-    parser.add_argument("--n-windows", help="Number of windows to look back across. Default window length is 2 hours.",
-                        default=6, type=int)
+    parser.add_argument("--output-file",
+                        help="output to file path",
+                        default="/tmp/notifications.tsv")
+    parser.add_argument("--commit",
+                        help="just cancel jobs",
+                        default=False,
+                        action="store_true")
+    parser.add_argument("--n-windows",
+                        help="Number of windows to look back across. Default window length is 2 hours.",
+                        type=int,
+                        default=6)
 
     args = parser.parse_args()
 
-    main(args.circleapitoken, args.orgreposlug, args.n_windows, args.output_file, args.commit)
+    main(args.circleapitoken, args.orgreposlug,
+         args.n_windows, args.output_file, args.commit)
