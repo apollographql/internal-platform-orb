@@ -99,7 +99,7 @@ if __name__ == "__main__":
     parser.add_argument("--commit", help="just cancel jobs",
                         default=False, action="store_true")
     parser.add_argument("--n-windows", help="Number of windows to look back across. Default window length is 2 hours.",
-                        default=6, action="store_true")
+                        default=6, type=int)
 
     args = parser.parse_args()
 
