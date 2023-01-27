@@ -8,7 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - Alerting included now for errors originating from CircleCI
-- `circleci-continue-long-job-cancel.yml`
+- Command: `circleci-continue-long-job-cancel`
   - `--n-windows` argument:
     - Allows for setting how many windows for the continue CircleCI crawler to walk back across
     - Default: 6 (12 hours, each window is 2 hours in length)
