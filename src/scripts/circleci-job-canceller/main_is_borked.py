@@ -12,6 +12,8 @@ import re
 
 from dateutil.parser import *
 
+sys.path.append("..")  # added!
+
 # Turn on / off debugging
 #http.client.HTTPConnection.debuglevel = 1
 
