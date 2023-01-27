@@ -2,14 +2,14 @@ import requests
 import pprint
 
 
-def http_get(url, headers):
-    response = requests.get(url, headers=headers)
+def http_get(url, **args):
+    response = requests.get(url, **args)
     response.raise_for_status()
     return response
 
 
-def http_post(url, headers):
-    response = requests.post(url, headers=headers)
+def http_post(url, **args):
+    response = requests.post(url, **args)
     response.raise_for_status()
     return response
 

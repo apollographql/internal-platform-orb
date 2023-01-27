@@ -74,10 +74,13 @@ def make_graphql_query(githubtoken, orgreposlug):
 
     graph_ql_verify = {"query": """query { viewer { login } }"""}
 
-    res = http_post("https://api.github.com/graphql", json=graph_ql_query, headers={
-        "Authorization": f"Bearer {githubtoken}",
-        "Content-Type": "application/json"
-    })
+    res = http_post(
+        "https://api.github.com/graphql",
+        json=graph_ql_query,
+        headers={
+            "Authorization": f"Bearer {githubtoken}",
+            "Content-Type": "application/json"
+        })
 
     return res
 
