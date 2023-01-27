@@ -4,8 +4,6 @@ from Modules.circle_utils import *
 
 import argparse
 import pprint
-import json
-import http
 import datetime
 import sys
 import re

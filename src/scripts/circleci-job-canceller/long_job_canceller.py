@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 from Modules.circle_utils import *
-import requests
 import datetime
 import sys
 import os.path
