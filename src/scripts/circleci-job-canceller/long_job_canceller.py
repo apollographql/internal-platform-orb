@@ -34,7 +34,7 @@ def pipeline_created_at_to_datetime(pipeline):
     Pipeline's create_at value is in ISO 8601 format: Y-m-dTH:M:S.fZ, convert to a
     datetime.
     '''
-    return datetime.datetime.fromisoformat(pipeline['created_at'][:-1])
+    return datetime.datetime.fromisoformat(pipeline['created_at'][:-1]).replace(tzinfo=datetime.timezone.utc)
 
 
 def find_old_workflow_ids(repo_slug, window_start, window_end, headers):
