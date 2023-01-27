@@ -4,6 +4,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.0.14] - 2023-01-27
+
+### Added
+- Alerting included now for errors originating from CircleCI
+- `circleci-continue-long-job-cancel.yml`
+  - `--n-windows` argument:
+    - Allows for setting how many windows for the continue CircleCI crawler to walk back across
+    - Default: 6 (12 hours, each window is 2 hours in length)
+
 ## [1.0.13] - 2023-01-23
 
 ### Fixed
