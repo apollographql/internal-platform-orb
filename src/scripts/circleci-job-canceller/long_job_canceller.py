@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 
 from Modules.circle_utils import *
-import requests
 import datetime
 import sys
 import os.path
@@ -23,7 +22,7 @@ robot_committers = ["apollo-bot2"]
 
 def get_workflow_started_by(current_workflow, headers):
     user_url = f"https://circleci.com/api/v2/user/{current_workflow['started_by']}"
-    user_info = requests.get(user_url, headers=headers).json()
+    user_info = http_get(user_url, headers=headers).json()
     # the Github / CircleCI scheduling bot won't have a username (JSON body will be {'message': 'Not found.'})
     username = user_info.get("login", "")
 
@@ -60,7 +59,7 @@ def find_old_workflow_ids(repo_slug, window_start, window_end, headers):
                     yield {"job_status": "too_old", "name": current_workflow['name'], "id": current_workflow['id'], "username": username}
 
 
-def main(circleapitoken, orgreposlug, output_file, commit):
+def main(circleapitoken, orgreposlug, n_windows, output_file, commit):
     standard_headers = {"Circle-Token": circleapitoken}
 
     simple_path = os.path.abspath(os.path.expanduser(
@@ -70,7 +69,7 @@ def main(circleapitoken, orgreposlug, output_file, commit):
         f.write("job_status\tproceed\tid\tusername\tname\n")
         for current_info in find_old_workflow_ids(
             orgreposlug,
-            now - (job_life_clock * 5),
+            now - (job_life_clock * n_windows),
             now - job_midlife_warning,
             standard_headers
         ):
@@ -81,7 +80,7 @@ def main(circleapitoken, orgreposlug, output_file, commit):
                 print(
                     f"found too old workflow: {current_info['id']} ({current_info['name']}) See more info at: https://app.circleci.com/pipelines/workflows/{current_info['id']}")
                 if commit:
-                    requests.post(
+                    http_post(
                         f"https://circleci.com/api/v2/workflow/{current_info['id']}/cancel", headers=standard_headers)
 
             f.write(
@@ -99,7 +98,9 @@ if __name__ == "__main__":
                         default="/tmp/notifications.tsv", )
     parser.add_argument("--commit", help="just cancel jobs",
                         default=False, action="store_true")
+    parser.add_argument("--n-windows", help="Number of windows to look back across. Default window length is 2 hours.",
+                        default=6, action="store_true")
 
     args = parser.parse_args()
 
-    main(args.circleapitoken, args.orgreposlug, args.output_file, args.commit)
+    main(args.circleapitoken, args.orgreposlug, args.n_windows, args.output_file, args.commit)

@@ -1,16 +1,16 @@
 #!/usr/bin/env python3
 
-import requests
+from Modules.circle_utils import *
 
 import argparse
 import pprint
-import json
-import http
 import datetime
 import sys
 import re
 
 from dateutil.parser import *
+
+sys.path.append("..")  # added!
 
 # Turn on / off debugging
 #http.client.HTTPConnection.debuglevel = 1
@@ -74,7 +74,7 @@ def make_graphql_query(githubtoken, orgreposlug):
 
     graph_ql_verify = {"query": """query { viewer { login } }"""}
 
-    res = requests.post("https://api.github.com/graphql", json=graph_ql_query, headers={
+    res = http_post("https://api.github.com/graphql", json=graph_ql_query, headers={
         "Authorization": f"Bearer {githubtoken}",
         "Content-Type": "application/json"
     })
@@ -134,7 +134,7 @@ def main(githubtoken, orgreposlug, circleapitoken):
                 api_url = f"https://circleci.com/api/v2/workflow/{workflow_id}"
                 standard_headers = {"Circle-Token": circleapitoken}
 
-                workflow_info = requests.get(api_url, headers=standard_headers).json()
+                workflow_info = http_get(api_url, headers=standard_headers).json()
                 if workflow_info.get("status") == "canceled":
                     return
 
@@ -163,10 +163,10 @@ def main(githubtoken, orgreposlug, circleapitoken):
                 standard_headers = {"Circle-Token": circleapitoken}
                 api_url = f"https://circleci.com/api/v2/project/gh/{orgreposlug}/job/{job_id}"
 
-                workflow_info = requests.get(api_url, headers=standard_headers).json()
+                workflow_info = http_get(api_url, headers=standard_headers).json()
                 pipeline_id = workflow_info["pipeline"]["id"]
 
-                pipeline_info = requests.get(f"https://circleci.com/api/v2/pipeline/{pipeline_id}", headers=standard_headers).json()
+                pipeline_info = http_get(f"https://circleci.com/api/v2/pipeline/{pipeline_id}", headers=standard_headers).json()
                 #print(pipeline_info)
 
                 failed_branch = pipeline_info["vcs"]["branch"]
