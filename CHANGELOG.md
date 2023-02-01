@@ -4,10 +4,34 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.0.14] - 2023-01-26
+## [1.0.18] - 2023-02-02
 ### Added
 
   - The command `circleci-continue-long-job-cancel` can ignore - that is not emit age warings - for workflows where all the on hold jobs waiting have a name that contains the text in the ignore-jobs-with-name parameter
+
+## [1.0.17] - 2023-01-27
+
+### Fixed
+- 1.0.13 introduced a bug with `circleci-continue-long-job-cancel`'s datetime comparisons.
+
+## [1.0.16] - 2023-01-27
+
+### Fixed
+- 1.0.14 introduced a bug with some Python `requests` helpers.
+
+## [1.0.15] - 2023-01-27
+
+### Fixed
+- 1.0.14 introduced a bug in the way that our Python scripts function in regards to argument parsing.
+
+## [1.0.14] - 2023-01-27
+
+### Added
+- Alerting included now for errors originating from CircleCI
+- Command: `circleci-continue-long-job-cancel`
+  - `--n-windows` argument:
+    - Allows for setting how many windows for the continue CircleCI crawler to walk back across
+    - Default: 6 (12 hours, each window is 2 hours in length)
 
 ## [1.0.13] - 2023-01-23
 

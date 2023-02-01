@@ -26,7 +26,7 @@ robot_committers = ["apollo-bot2"]
 
 def get_workflow_started_by(current_workflow, headers):
     user_url = f"https://circleci.com/api/v2/user/{current_workflow['started_by']}"
-    user_info = requests.get(user_url, headers=headers).json()
+    user_info = http_get(user_url, headers=headers).json()
     # the Github / CircleCI scheduling bot won't have a username (JSON body will be {'message': 'Not found.'})
     username = user_info.get("login", "")
 
@@ -46,15 +46,24 @@ def get_workflow_pending_approval_jobs(workflow_id, headers):
             yield current_job
 
 
+def pipeline_created_at_to_datetime(pipeline):
+    '''
+    Pipeline's create_at value is in ISO 8601 format: Y-m-dTH:M:S.fZ, convert to a
+    datetime.
+    '''
+    return datetime.datetime.fromisoformat(pipeline['created_at'][:-1]).replace(tzinfo=datetime.timezone.utc)
+
+
 def find_old_workflow_ids(repo_slug, window_start, window_end, headers):
     print(f'Window to paginate through: [{window_start}, {window_end}]')
     for current_pipeline in get_all_items(f"/project/gh/{repo_slug}/pipeline", headers, None):
         # Paginate through only those pipelines which started inside our given window
-        if str(window_end) < current_pipeline['created_at']:
-            print(f'Pipeline too young: {current_pipeline["created_at"]}')
+        created_at = pipeline_created_at_to_datetime(current_pipeline)
+        if window_end < created_at:
+            print(f'Pipeline too young: {created_at}')
             continue
-        if current_pipeline['created_at'] < str(window_start):
-            print(f'Pipeline too old: {current_pipeline["created_at"]}')
+        if created_at < window_start:
+            print(f'Pipeline too old: {created_at}')
             return None
 
         for current_workflow in get_all_items(f"/pipeline/{current_pipeline['id']}/workflow", headers, None):
@@ -84,6 +93,8 @@ def do_we_care_about_this_pipeline(current_info, ignore, headers):
 
     # we want to know if all of the names of the approval jobs waiting contain the ignore keyword
     # if all of them do, then we do NOT care about this pipeline
+
+    # TODO: handle case where ignore == "", which is the default for the Circle config
     not_ignored_jobs = itertools.dropwhile( lambda x: x['name'].find(ignore) > -1 , pending_approvals )
 
     amount_we_still_care_about = len(list(not_ignored_jobs))
@@ -92,7 +103,7 @@ def do_we_care_about_this_pipeline(current_info, ignore, headers):
     return ( output )
 
 
-def main(circleapitoken, orgreposlug, output_file, commit, ignore):
+def main(circleapitoken, orgreposlug, n_windows, output_file, commit, ignore):
     standard_headers = {"Circle-Token": circleapitoken}
 
     simple_path = os.path.abspath(os.path.expanduser(
@@ -102,7 +113,7 @@ def main(circleapitoken, orgreposlug, output_file, commit, ignore):
         f.write("job_status\tproceed\tid\tusername\tname\n")
         for current_info in find_old_workflow_ids(
             orgreposlug,
-            now - (job_life_clock * 5),
+            now - (job_life_clock * n_windows),
             now - job_midlife_warning,
             standard_headers
         ):
@@ -117,7 +128,7 @@ def main(circleapitoken, orgreposlug, output_file, commit, ignore):
                 print(
                     f"found too old workflow: {current_info['id']} ({current_info['name']}) See more info at: https://app.circleci.com/pipelines/workflows/{current_info['id']}")
                 if commit:
-                    requests.post(
+                    http_post(
                         f"https://circleci.com/api/v2/workflow/{current_info['id']}/cancel", headers=standard_headers)
 
             f.write(
@@ -126,17 +137,25 @@ def main(circleapitoken, orgreposlug, output_file, commit, ignore):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "circleapitoken", help="the CircleCI API token for this script")
-    parser.add_argument(
-        "orgreposlug", help="the location, user-or-org/repository-name , of this repository")
+    parser.add_argument("circleapitoken",
+                        help="the CircleCI API token for this script")
+    parser.add_argument("orgreposlug",
+                        help="the location, user-or-org/repository-name , of this repository")
 
-    parser.add_argument("--output-file", help="output to file path",
-                        default="/tmp/notifications.tsv", )
-    parser.add_argument("--commit", help="just cancel jobs",
-                        default=False, action="store_true")
+    parser.add_argument("--output-file",
+                        help="output to file path",
+                        default="/tmp/notifications.tsv")
+    parser.add_argument("--commit",
+                        help="just cancel jobs",
+                        default=False,
+                        action="store_true")
+    parser.add_argument("--n-windows",
+                        help="Number of windows to look back across. Default window length is 2 hours.",
+                        type=int,
+                        default=6)
     parser.add_argument("--ignore", help="ignore steps that contain this word", default="")
 
     args = parser.parse_args()
 
-    main(args.circleapitoken, args.orgreposlug, args.output_file, args.commit, args.ignore)
+    main(args.circleapitoken, args.orgreposlug,
+         args.n_windows, args.output_file, args.commit, args.ignore)
