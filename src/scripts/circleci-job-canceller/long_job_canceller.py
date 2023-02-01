@@ -85,10 +85,23 @@ def find_old_workflow_ids(repo_slug, window_start, window_end, headers):
                     yield {"job_status": "too_old", "name": current_workflow['name'], "id": current_workflow['id'], "username": username}
 
 
-def filter_ignored_jobs(current_info, ignore, headers):
+def matches_any_in_list(str, list):
+    for current in list:
+        if ( str.find(current) > -1 ):
+            return True
+    return False
+
+
+def has_only_ignored_jobs(current_info, ignore, headers):
     pending_approvals = get_workflow_pending_approval_jobs(current_info['id'], headers)
 
-    return list( itertools.dropwhile( lambda x: x['name'].find(ignore) > -1 , pending_approvals ) )
+    for current in itertools.filterfalse(
+            lambda x: matches_any_in_list(x['name'], ignore),
+            pending_approvals ):
+        # if we are here then we have a job name that is not filtered by our ignore list
+        # (so we do not _only_ have ignored jobs). Short circuit, the answer to our question is False
+        return False
+    return True
 
 
 def main(circleapitoken, orgreposlug, n_windows, output_file, commit, ignore):
@@ -107,8 +120,7 @@ def main(circleapitoken, orgreposlug, n_windows, output_file, commit, ignore):
         ):
             if current_info["job_status"] == "age_warning":
                 if not (ignore == ""):
-                    jobs_we_care_about = filter_ignored_jobs(current_info, ignore, standard_headers)
-                    if len(jobs_we_care_about) == 0:
+                    if has_only_ignored_jobs(current_info, ignore, standard_headers):
                         print(f"ignoring workflow: {current_info['id']} See more info at https://app.circleci.com/pipelines/workflows/{current_info['id']}")
                         continue
                 print(
@@ -142,9 +154,9 @@ if __name__ == "__main__":
                         help="Number of windows to look back across. Default window length is 2 hours.",
                         type=int,
                         default=6)
-    parser.add_argument("--ignore", help="if all awaiting approval jobs in the pipeline contain this word, do not age warn about it", default="")
+    parser.add_argument("--ignore", help="if all awaiting approval jobs in the pipeline contain this word, do not age warn about it. Multiple word supported by delimiting with ,", default="")
 
     args = parser.parse_args()
 
     main(args.circleapitoken, args.orgreposlug,
-         args.n_windows, args.output_file, args.commit, args.ignore)
+         args.n_windows, args.output_file, args.commit, args.ignore.split(","))
