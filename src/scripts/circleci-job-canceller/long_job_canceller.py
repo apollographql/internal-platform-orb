@@ -1,12 +1,13 @@
 #!/usr/bin/env python3
 
 from Modules.circle_utils import *
-import requests
 import datetime
-import sys
+import itertools
 import os.path
 import pprint
-import itertools
+import requests
+import sys
+
 
 from dateutil.parser import *
 
@@ -39,14 +40,10 @@ def get_workflow_pending_approval_jobs(workflow_id, headers):
     and return information about approval jobs in this workflow that are on hold
     (so then we can filter them later)
     """
-    url = f"https://circleci.com/api/v2/workflow/{workflow_id}/job"
-    workflow_info = requests.get(url, headers=headers).json()
 
-    all_jobs = workflow_info.get("items")
-    output = []
-
-    [ output.append(x) for x in all_jobs if (x.get("type") == "approval") and (x.get("status") == "on_hold") ]
-    return output
+    for current_job in get_all_items(f"/workflow/{workflow_id}/job", headers):
+        if (current_job.get("type") == "approval") and (current_job.get("status") == "on_hold"):
+            yield current_job
 
 
 def find_old_workflow_ids(repo_slug, window_start, window_end, headers):
@@ -83,7 +80,7 @@ def do_we_care_about_this_pipeline(current_info, ignore, headers):
     if ignore == "":
         return True
 
-    pending_approvals = get_workflow_pending_approval_jobs(current_info['id'], headers)
+    pending_approvals = list(get_workflow_pending_approval_jobs(current_info['id'], headers))
 
     # we want to know if all of the names of the approval jobs waiting contain the ignore keyword
     # if all of them do, then we do NOT care about this pipeline
