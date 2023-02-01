@@ -95,11 +95,10 @@ def do_we_care_about_this_pipeline(current_info, ignore, headers):
     # if all of them do, then we do NOT care about this pipeline
 
     not_ignored_jobs = itertools.dropwhile( lambda x: x['name'].find(ignore) > -1 , pending_approvals )
-
     amount_we_still_care_about = len(list(not_ignored_jobs))
-    output = amount_we_still_care_about > 0
+
     print(f"Workflow initially had {len(pending_approvals)} approval jobs, {amount_we_still_care_about} we care about")
-    return ( output )
+    return (  amount_we_still_care_about > 0 )
 
 
 def main(circleapitoken, orgreposlug, n_windows, output_file, commit, ignore):
@@ -119,7 +118,7 @@ def main(circleapitoken, orgreposlug, n_windows, output_file, commit, ignore):
             if current_info["job_status"] == "age_warning":
                 if not do_we_care_about_this_pipeline(current_info, ignore, standard_headers):
                     if not (ignore == ""):
-                        print("we do not care about this pipeline - all jobs contained ignore word")
+                        print("we do not care about this pipeline - all awaiting approval jobs contained ignore word")
                     continue
                 print(
                     f"midlife warning for workflow ({current_info['name']}), started by gh:{current_info['username']}. See more info at: https://app.circleci.com/pipelines/workflows/{current_info['id']}")
@@ -152,7 +151,7 @@ if __name__ == "__main__":
                         help="Number of windows to look back across. Default window length is 2 hours.",
                         type=int,
                         default=6)
-    parser.add_argument("--ignore", help="ignore steps that contain this word", default="")
+    parser.add_argument("--ignore", help="if all awaiting approval jobs in the pipeline contain this word, do not age warn about it", default="")
 
     args = parser.parse_args()
 
