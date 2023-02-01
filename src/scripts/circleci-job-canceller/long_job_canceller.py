@@ -119,7 +119,7 @@ def main(circleapitoken, orgreposlug, n_windows, output_file, commit, ignore):
             standard_headers
         ):
             if current_info["job_status"] == "age_warning":
-                if not (ignore == ""):
+                if not (ignore == ['']):
                     if has_only_ignored_jobs(current_info, ignore, standard_headers):
                         print(f"ignoring workflow: {current_info['id']} See more info at https://app.circleci.com/pipelines/workflows/{current_info['id']}")
                         continue
