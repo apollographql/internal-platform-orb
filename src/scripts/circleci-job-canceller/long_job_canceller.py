@@ -85,20 +85,10 @@ def find_old_workflow_ids(repo_slug, window_start, window_end, headers):
                     yield {"job_status": "too_old", "name": current_workflow['name'], "id": current_workflow['id'], "username": username}
 
 
-def do_we_care_about_this_pipeline(current_info, ignore, headers):
-    if ignore == "":
-        return True
+def filter_ignored_jobs(current_info, ignore, headers):
+    pending_approvals = get_workflow_pending_approval_jobs(current_info['id'], headers)
 
-    pending_approvals = list(get_workflow_pending_approval_jobs(current_info['id'], headers))
-
-    # we want to know if all of the names of the approval jobs waiting contain the ignore keyword
-    # if all of them do, then we do NOT care about this pipeline
-
-    not_ignored_jobs = itertools.dropwhile( lambda x: x['name'].find(ignore) > -1 , pending_approvals )
-    amount_we_still_care_about = len(list(not_ignored_jobs))
-
-    print(f"Workflow initially had {len(pending_approvals)} approval jobs, {amount_we_still_care_about} we care about")
-    return (  amount_we_still_care_about > 0 )
+    return list( itertools.dropwhile( lambda x: x['name'].find(ignore) > -1 , pending_approvals ) )
 
 
 def main(circleapitoken, orgreposlug, n_windows, output_file, commit, ignore):
@@ -116,10 +106,11 @@ def main(circleapitoken, orgreposlug, n_windows, output_file, commit, ignore):
             standard_headers
         ):
             if current_info["job_status"] == "age_warning":
-                if not do_we_care_about_this_pipeline(current_info, ignore, standard_headers):
-                    if not (ignore == ""):
-                        print("we do not care about this pipeline - all awaiting approval jobs contained ignore word")
-                    continue
+                if not (ignore == ""):
+                    jobs_we_care_about = filter_ignored_jobs(current_info, ignore, standard_headers)
+                    if len(jobs_we_care_about) == 0:
+                        print(f"ignoring workflow: {current_info['id']} See more info at https://app.circleci.com/pipelines/workflows/{current_info['id']}")
+                        continue
                 print(
                     f"midlife warning for workflow ({current_info['name']}), started by gh:{current_info['username']}. See more info at: https://app.circleci.com/pipelines/workflows/{current_info['id']}")
             else:
