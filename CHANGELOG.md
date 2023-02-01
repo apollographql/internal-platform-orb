@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.18] - 2023-02-02
 ### Added
 
-  - The command `circleci-continue-long-job-cancel` can ignore - that is not emit age warings - for workflows where all the on hold jobs waiting have a name that contains the text in the ignore-jobs-with-name parameter
+  - The command `circleci-continue-long-job-cancel` can ignore - that is not emit age warings - for workflows where all the on hold (aka yet to be approved approval jobs) have a name containing specified words
 
 ## [1.0.17] - 2023-01-27
 
