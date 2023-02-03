@@ -93,14 +93,11 @@ def matches_any_in_list(str, list):
 
 
 def has_only_ignored_jobs(current_info, ignore, headers):
-    pending_approvals = get_workflow_pending_approval_jobs(current_info['id'], headers)
-
-    for current in itertools.filterfalse(
-            lambda x: matches_any_in_list(x['name'], ignore),
-            pending_approvals ):
-        # if we are here then we have a job name that is not filtered by our ignore list
-        # (so we do not _only_ have ignored jobs). Short circuit, the answer to our question is False
-        return False
+    for current in get_workflow_pending_approval_jobs(current_info['id'], headers):
+        if not matches_any_in_list(current['name'], ignore):
+          # if we are here then we have a job name that is not filtered by our ignore list
+          # (so we do not _only_ have ignored jobs). Short circuit, the answer to our question is False
+          return False
     return True
 
 
@@ -154,7 +151,7 @@ if __name__ == "__main__":
                         help="Number of windows to look back across. Default window length is 2 hours.",
                         type=int,
                         default=6)
-    parser.add_argument("--ignore", help="if all awaiting approval jobs in the pipeline contain this word, do not age warn about it. Multiple word supported by delimiting with ,", default="")
+    parser.add_argument("--ignore", help="if all awaiting approval jobs in the pipeline contain this word, do not age warn about it. Multiple word supported by delimiting with , (example: --ignore=optional,maybe). A job only has to match one of the words", default="")
 
     args = parser.parse_args()
 
