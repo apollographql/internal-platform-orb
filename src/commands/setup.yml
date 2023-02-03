@@ -8,6 +8,7 @@ parameters:
 
 steps:
   - run:
+      when: always
       command: |
         if [ -d  /tmp/apollo_internal_platform_orb ];
         then
