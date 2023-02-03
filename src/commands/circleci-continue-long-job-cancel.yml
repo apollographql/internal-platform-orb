@@ -12,7 +12,7 @@ parameters:
     default: "CIRCLECI_TOKEN"
     type: string
   ignore-jobs-containing:
-    description: do not warn people about workflows where all the on hold job names contain this string. Multiple strings seperated by comma, eg development,delete
+    description: Do not warn about workflows where all of the on hold job names contain a string from this comma separated list
     type: string
     default: ""
   n-windows:
