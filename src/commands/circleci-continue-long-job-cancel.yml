@@ -11,7 +11,7 @@ parameters:
     description: the name of the environmental variable that contains the circleci token
     default: "CIRCLECI_TOKEN"
     type: string
-  ignore-when-all-on-hold-jobs-contain:
+  ignore-when-all-on-hold-job-names-contain:
     description: Do not warn about workflows where all of the on hold job names contain this string (also supported - comma seperated list)
     type: string
     default: ""
@@ -25,7 +25,7 @@ steps:
       working_directory: /tmp/apollo_internal_platform_orb/src/scripts/circleci-job-canceller
       command: |
         python3 -m pip install -r requirements.txt
-        python3 long_job_canceller.py $<< parameters.circleci-token-variable >> << parameters.org-repo-slug >> --commit --n-windows << parameters.n-windows >> --ignore=<< parameters.ignore-when-all-on-hold-jobs-contain >>
+        python3 long_job_canceller.py $<< parameters.circleci-token-variable >> << parameters.org-repo-slug >> --commit --n-windows << parameters.n-windows >> --ignore-job-names=<< parameters.ignore-when-all-on-hold-job-names-contain >>
   - run:
       name: Spawn workflow jobs for warnings
       working_directory: /tmp/apollo_internal_platform_orb/src/scripts/render-yaml-from-tsv

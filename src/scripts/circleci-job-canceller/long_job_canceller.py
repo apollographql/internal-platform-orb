@@ -151,9 +151,9 @@ if __name__ == "__main__":
                         help="Number of windows to look back across. Default window length is 2 hours.",
                         type=int,
                         default=6)
-    parser.add_argument("--ignore", help="if all awaiting approval jobs in the pipeline contain this word, do not age warn about it. Multiple word supported by delimiting with , (example: --ignore=optional,maybe). A job only has to match one of the words", default="")
+    parser.add_argument("--ignore-job-names", help="if all awaiting approval jobs in the pipeline contain this word, do not age warn about it. Multiple word supported by delimiting with , (example: --ignore=optional,maybe). A job only has to match one of the words", default="")
 
     args = parser.parse_args()
 
     main(args.circleapitoken, args.orgreposlug,
-         args.n_windows, args.output_file, args.commit, args.ignore.split(","))
+         args.n_windows, args.output_file, args.commit, args.ignore_job_names.split(","))
