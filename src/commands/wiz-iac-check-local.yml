@@ -1,0 +1,36 @@
+description: |
+  Test infrastructure-as-code against SecOps-defined rules for misconfigurations.
+
+parameters:
+  path:
+    type: string
+    description: Path to local Git repository
+    default: ${CIRCLE_WORKING_DIRECTORY}
+  fail-on-findings:
+    type: boolean
+    description: Indicate if this check should fail if there are any findings >= min-fail-severity
+    default: true
+  do-diff-scan:
+    type: boolean
+    description: Set to False if you want to scan all files in the repo, not just changed files.
+    default: true
+  wiz-policies:
+    type: string
+    description: One or more Wiz IAC policies to use during this scan. If specifying multiple, they should be comma-separated
+    default: Apollo-Default-IAC-Policy
+
+steps:
+  - run:
+      name: Handle Selected Options
+      command: |
+        echo "export WIZ_DIFF_SCAN=<< parameters.do-diff-scan >>" >> "$BASH_ENV"
+        echo "export WIZ_SOURCE_PATH=<< parameters.path >>" >> "$BASH_ENV"
+        echo "export WIZ_POLICIES='<< parameters.wiz-policies >>'" >> "$BASH_ENV"
+        echo "export WIZ_FAIL_BUILDS=<< parameters.fail-on-findings >>" >> "$BASH_ENV"
+  - run:
+      name: Run Wiz IAC Scan
+      command: |
+         python3 /app/run-iac-scan.py
+  - store_artifacts:
+      path: /tmp/wiz-iac.json
+      destination: scan-results/wiz-iac.json

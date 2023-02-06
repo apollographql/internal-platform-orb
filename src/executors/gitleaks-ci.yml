@@ -1,0 +1,12 @@
+description: |
+  Use containerized Gitleaks to check the repository for secrets.
+
+docker:
+- image: us-central1-docker.pkg.dev/platform-cross-environment/platform-docker/gitleaks-minimal:2022.12.b29
+  auth:
+    username: _json_key
+    # This requires usage of one of the platform-docker-[ro] contexts
+    password: $CONTAINER_READONLY
+resource_class: small
+environment:
+  GOOGLE_CREDENTIALS: /tmp/.appcreds.json

@@ -1,0 +1,30 @@
+description: |
+  Clone a Git repo and check it for secrets.
+
+parameters:
+  options:
+    type: string
+    description: Additional options to pass to the Gitleaks CLI
+    default: ''
+  git-base-revision:
+    type: string
+    description: The commit hash of the earliest commit to be scanned. Use this field to pass in CircleCI's pipeline.git.base_revision parameter if it exists.
+  git-default-base-revision:
+    type: string
+    description: The commit hash of the earliest commit to be scanned. Use this field to pass in a fallback if CircleCI's pipeline.git.base_revision parameter doesn't exist.
+    default: HEAD~1
+  git-revision:
+    type: string
+    description: The commit hash of the latest commit to be scanned
+
+executor:
+  name: gitleaks-ci
+
+working_directory: /tmp/project
+
+steps:
+  - checkout
+  - gitleaks-check-local:
+      options: << parameters.options >>
+      git-base-revision: <<#parameters.git-base-revision >><< parameters.git-base-revision >><</parameters.git-base-revision >><<^parameters.git-base-revision >><< parameters.git-default-base-revision >><</parameters.git-base-revision >>
+      git-revision: << parameters.git-revision >>

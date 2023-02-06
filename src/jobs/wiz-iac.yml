@@ -1,0 +1,48 @@
+description: |
+  Test infrastructure-as-code against SecOps-defined rules for misconfigurations.
+
+  Wiz is a security tool owned by the SecOps team to monitor for vulnerabilities, misconfigurations, errors, and incidents
+  occurring in Apollo's public cloud environments.
+
+  Wiz provides the ability to scan IAC files like terraform documents, dockerfiles, etc. to identify vulnerabilities
+  that will be introduced if the IAC file is executed. Use this job to prevent vulnerabilities from being introduced
+  via IAC. SecOps manages the policy used to determine if jobs should pass/fail based on the vulnerabilities found.
+  You can ensure jobs will never fail (regardless of SecOps policy) via the fail-on-findings parameter.
+
+  Results from this scan are printed to stdout as part of the execution of the job. Additionally, scan results
+  are uploaded as a build artifact to this job.
+
+parameters:
+  fail-on-findings:
+    type: boolean
+    description: Indicate if this check should fail if there are any findings >= min-fail-severity
+    default: true
+  do-diff-scan:
+    type: boolean
+    description: Set to False if you want to scan all files in the repo, not just changed files.
+    default: true
+  wiz-policies:
+    type: string
+    description: One or more Wiz IAC policies to use during this scan. If specifying multiple, they should be comma-separated
+    default: Apollo-Default-IAC-Policy
+
+executor:
+  name: wiz-ci
+
+working_directory: /tmp/project
+
+steps:
+  - checkout
+  - run:
+      name: Update Wiz
+      command: |
+        # This script provided by the executor
+        python3 /app/install-wiz.py
+  - run:
+      name: Authenticate with Wiz
+      command: |
+        /app/wizcli/wizcli auth --id ${WIZCLI_ID} --secret ${WIZCLI_SECRET}
+  - wiz-iac-check-local:
+      fail-on-findings: << parameters.fail-on-findings >>
+      do-diff-scan: << parameters.do-diff-scan >>
+      wiz-policies: << parameters.wiz-policies >>

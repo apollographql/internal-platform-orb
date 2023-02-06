@@ -1,0 +1,105 @@
+description: |
+  Perform security and (optionally) best-practice tests on source.
+
+  Semgrep supports scanning all of the common languages in use at Apollo including Kotlin, Java, Typescript, Javascript, Rust, Python, etc.
+  See https://semgrep.dev/docs/supported-languages/ for the list of all supported languages. Languages labelled "Beta" or "Experimental"
+  on the linked page are supported. The differences between these support levels are mainly in the number of semgrep-internal features currently
+  supported for the language and the number of open-source rules available for the language.
+
+  This job will not break builds if an unsupported language is present in the repo being scanned. Rulesets are enabled based on
+  the files in the repository and rules are only executed on files that contain code in supported languages.
+
+  The rules Semgrep executes are versioned here: https://github.com/mdg-private/semgrep-scan/tree/main/rules. SecOps regularly
+  fetches new rules from open-source respositories of high-quality Semgrep rules. Apollo engineers are encouraged to open PRs on the
+  linked repo to contribute new rules as desired.
+
+  The default values for the parameters on this job represent SecOps' recommended configuration for long-term
+  implementation in pipelines and for new projects utilizing this job from the start. If you use the default options for
+  all non-required parameters, this job will run security tests for the languages identified in the repo being scanned. Languages
+  present are identified via a combination of filenames and file extensions in the repo. By default this job will operate in a 'diff-aware'
+  mode which only scans files modified via the commit(s) in a given branch. By default, this job will fail builds if a
+  finding with severity "ERROR" (read: critical) is found. The combination of these defaults means that jobs will fail if an ERROR-level finding
+  is introduced in any branch implementing the default values for this check. Pre-existing issues will not be identified or fail builds provided
+  they exist in files not being modified in the branch.
+
+  The goal of the default behavior is to help engineers identify issues early before they are deployed - even to Dev environments. Security
+  vulnerabilities are generally cheaper and easier to fix the earlier they are found.
+
+  This is *strongly* discouraged, but in the event that a team MUST deploy code that contains a vulnerability blocking builds, teams have several options
+  to silence this job without removing it from their pipeline. Teams can add comments to lines introducing the vulnerability to indicate Semgrep should ignore
+  the line (details documented here: https://apollographql.atlassian.net/wiki/spaces/SecOps/pages/81330213/Everything+Static+Application+Security+Testing).
+  Teams can additionally utilize the 'disabled-signatures' parameter on this job to turn specific rules off in the pipeline. The value(s) that need to be
+  added to this parameter are displayed in both output formats described below. Signatures will usually start with 'rules.providers.semgrep'
+
+  SecOps recommends that teams do not use the default configuration for their initial addition of this job into existing repos. SecOps recommends
+  that initial integration sets 'fail-on-findings' and 'do-diff-scan' to 'false'. Setting fail-on-findings to false will prevent this job from
+  failing builds. Setting do-diff-scan to false will run Semgrep against all files in the repo, not just files being changed. This combination of settings
+  will let teams see all findings that _could_ be generated from the repo while ensuring that builds will not fail. As teams address ERROR-level findings
+  on the repo, they can ratchet the configurations back toward default.
+
+  Output from this job is written to two locations. For a tabular view of results, see the 'Results' step of this job. If teams utilize
+  SecOps' recommended initial deployment configuration for existing repos above, they can see which findings _would_ have failed the build but didn't
+  due to fail-on-findings being set to false in the tabular view. A JSON-formatted report of all findings is also uploaded to the
+  scan-results/semgrep.json build artifact.
+
+parameters:
+  options:
+    type: string
+    description: Additional options to pass to the Semgrep CLI
+    default: ''
+  git-base-revision:
+    type: string
+    description: The commit hash of the earliest commit to be scanned. Use this field to pass in CircleCI's pipeline.git.base_revision parameter if it exists.
+  git-default-base-revision:
+    type: string
+    description: The commit hash of the earliest commit to be scanned. Use this field to pass in a fallback if CircleCI's pipeline.git.base_revision parameter doesn't exist.
+    default: HEAD~1
+  run-security-checks:
+    type: boolean
+    description: If true, add security rules to list of checks that semgrep performs
+    default: true
+  run-bestpractice-checks:
+    type: boolean
+    description: If true, add best practice / code-style rules to the list of checks that semgrep performs
+    default: false
+  disabled-signatures:
+    type: string
+    description: A comma-separated list of rules that you would like to disable
+    default: ''
+  fail-on-findings:
+    type: boolean
+    description: Indicate if this check should fail if there are any findings >= min-fail-severity
+    default: true
+  min-fail-severity:
+    type: 'enum'
+    enum: ['INFO', 'WARNING', 'ERROR']
+    description: The minimum severity of finding that will cause builds to fail.
+    default: ERROR
+  do-diff-scan:
+    type: boolean
+    description: Set to False if you want to scan all files in the repo, not just changed files.
+    default: true
+  update-rules:
+    type: boolean
+    description: |
+      Set to true if rules should be updated prior to scanning. Else, scanning uses the rules built into the executor.
+      Rules are updated from https://github.com/mdg-private/semgrep-scan/tree/main/rules
+    default: true
+
+executor:
+  name: semgrep-ci
+
+working_directory: /tmp/project
+
+steps:
+  - checkout
+  - semgrep-check-local:
+      options: << parameters.options >>
+      git-base-revision: <<#parameters.git-base-revision >><< parameters.git-base-revision >><</parameters.git-base-revision >><<^parameters.git-base-revision >><< parameters.git-default-base-revision >><</parameters.git-base-revision >>
+      run-security-checks: << parameters.run-security-checks >>
+      run-bestpractice-checks: << parameters.run-bestpractice-checks >>
+      disabled-signatures: << parameters.disabled-signatures >>
+      fail-on-findings: << parameters.fail-on-findings >>
+      min-fail-severity: << parameters.min-fail-severity >>
+      do-diff-scan: << parameters.do-diff-scan >>
+      update-rules: << parameters.update-rules >>

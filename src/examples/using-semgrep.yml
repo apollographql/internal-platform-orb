@@ -1,0 +1,29 @@
+description: >
+  An example of using semgrep in your workflow to test code for vulnerabilities.
+
+  Semgrep supports scanning all of the common languages in use at Apollo including Kotlin, Java, Typescript, Javascript, Rust, Python, etc.
+  See https://semgrep.dev/docs/supported-languages/ for the list of all supported languages. Languages labelled "Beta" or "Experimental"
+  on the linked page are supported. The differences between these support levels are mainly in the number of semgrep-internal features currently
+  supported for the language and the number of open-source rules available for the language.
+
+  This job will not break builds if an unsupported language is present in the repo being scanned. Rulesets are enabled based on
+  the files in the repository and rules are only executed on files that contain code in supported languages.
+
+  The rules Semgrep executes are versioned here: https://github.com/mdg-private/semgrep-scan/tree/main/rules. SecOps regularly
+  fetches new rules from open-source respositories of high-quality Semgrep rules. Apollo engineers are encouraged to open PRs on the
+  linked repo to contribute new rules as desired. Rules can also be written for non-security usecases like enforcing best practice and code style.
+
+usage:
+  version: 2.1
+  orbs:
+    circleci-pde-orb: apollo-mdg-private/circleci-pde-orb@2.0.8
+  workflows:
+    check-for-vulns:
+      jobs:
+        - circleci-pde-orb/semgrep:
+            # This is ugly but currently required. CircleCI doesn't always set this parameter. This handles cases where it doesn't exist.
+            git-base-revision: <<#pipeline.git.base_revision >><<pipeline.git.base_revision >><</pipeline.git.base_revision >>
+            git-revision: << pipeline.git.revision >>
+            context:
+              - platform-docker-ro
+              - github_orb

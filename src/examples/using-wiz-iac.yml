@@ -1,0 +1,22 @@
+description: >
+  An example of using Wiz Infrastructure-as-Code (IAC) scanning in your pipeline to check for vulnerabilities.
+
+  Wiz is a security tool owned by the SecOps team to monitor for vulnerabilities, misconfigurations, errors, and incidents
+  occurring in Apollo's public cloud environments.
+
+  Wiz provides the ability to scan IAC files like terraform documents, dockerfiles, etc. to identify vulnerabilities
+  that will be introduced if the IAC file is executed. Use this job to prevent vulnerabilities from being introduced
+  via IAC.
+
+usage:
+  version: 2.1
+  orbs:
+    circleci-pde-orb: apollo-mdg-private/circleci-pde-orb@2.0.9
+  workflows:
+    security-scans:
+      jobs:
+        - circleci-pde-orb/wiz-iac:
+            context:
+              - platform-docker-ro
+              - github_orb
+              - wiz

@@ -1,0 +1,12 @@
+description: |
+  Use containerized wizcli to check the repository for vulnerabilities.
+
+docker:
+- image: us-central1-docker.pkg.dev/platform-cross-environment/platform-docker/wiz-ci:2023.01.b250
+  auth:
+    username: _json_key
+    # This requires usage of one of the platform-docker-[ro] contexts
+    password: $CONTAINER_READONLY
+resource_class: small
+environment:
+  GOOGLE_CREDENTIALS: /tmp/.appcreds.json

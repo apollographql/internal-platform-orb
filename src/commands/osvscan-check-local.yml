@@ -1,0 +1,47 @@
+description: |
+  Run osv-scanner against a local repository.
+
+  osv-scanner checks for vulnerabilities in dependencies by comparing package versions in lockfiles
+  to vulnerability databases. This job reports on those findings and additionally checks for related,
+  existing pull requests in Github that appear to resolve the identified vulnerability.
+
+  osv-scanner will recursively search for the following lockfiles to scan for vulnerabilities:
+  buildscript-gradle.lockfile, Cargo.lock, composer.lock, conan.lock, Gemfile.lock, go.mod, gradle.lockfile,
+  mix.lock, package-lock.json, packages.lock.json, Pipfile.lock, pnpm-lock.yaml, poetry.lock, pom.xml,
+  pubspec.lock, requirements.txt, and yarn.lock. Additional lockfile formats may be added in the future.
+  See https://github.com/google/osv-scanner#input-a-lockfile for the most up-to-date list.
+
+  By default, this job will fail builds if 1 or more critical-severity vulnerabilities is identified
+  in lockfiles. This behavior can be overridden via the fail-on-findings and min-fail-severity
+  parameters.
+
+parameters:
+  path:
+    type: string
+    description: Path to local Git repository
+    default: ${CIRCLE_WORKING_DIRECTORY}
+  fail-on-findings:
+    type: boolean
+    description: Indicate if this check should fail if there are any findings >= min-fail-severity
+    default: true
+  min-fail-severity:
+    type: enum
+    enum: ['LOW', 'MODERATE', 'HIGH', 'CRITICAL']
+    description: The minimum severity of finding that will cause builds to fail.
+    default: CRITICAL
+
+
+steps:
+  - run:
+      name: Handle Selected Options
+      command: |
+        echo "export OSV_SOURCE_PATH=<< parameters.path >>" >> "$BASH_ENV"
+        echo "export OSV_FAIL_BUILDS=<< parameters.fail-on-findings >>" >> "$BASH_ENV"
+        echo "export OSV_FAIL_SEVERITY=<< parameters.min-fail-severity >>" >> "$BASH_ENV"
+  - run:
+      name: Run Scan
+      command: |
+         python3 /app/run-scan.py
+  - store_artifacts:
+      path: /tmp/osv-scan.json
+      destination: scan-results/osv-scan.json

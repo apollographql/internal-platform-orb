@@ -1,0 +1,15 @@
+description: >
+  An example of using gitleaks in your workflow to test code for secrets
+usage:
+  version: 2.1
+  orbs:
+    circleci-pde-orb: apollo-mdg-private/circleci-pde-orb@2.0.7
+  workflows:
+    check-for-secrets:
+      jobs:
+        - circleci-pde-orb/gitleaks:
+            # This is ugly but currently required. CircleCI doesn't always set this parameter. This handles cases where it doesn't exist.
+            git-base-revision: <<#pipeline.git.base_revision >><<pipeline.git.base_revision >><</pipeline.git.base_revision >>
+            git-revision: << pipeline.git.revision >>
+            context:
+              - platform-docker-ro

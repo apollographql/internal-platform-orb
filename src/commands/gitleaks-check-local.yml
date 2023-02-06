@@ -1,0 +1,56 @@
+description: |
+  Run Gitleaks against a local repository.
+
+parameters:
+  path:
+    type: string
+    description: Path to local Git repository
+    default: ${CIRCLE_WORKING_DIRECTORY}
+  options:
+    type: string
+    description: Additional options to pass to the Gitleaks CLI
+    default: ''
+  git-base-revision:
+    type: string
+    description: The commit hash of the earliest commit to be scanned
+  git-revision:
+    type: string
+    description: The commit hash of the latest commit to be scanned
+
+steps:
+  - run:
+      name: Decide which commits to check
+      command: |
+        DEFAULT_BRANCH=$(git rev-parse --abbrev-ref origin/HEAD | cut -c8-)
+        CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+        echo "I detected that the default branch is ${DEFAULT_BRANCH}"
+        echo "I detected that the current branch is ${CURRENT_BRANCH}"
+        if [ $DEFAULT_BRANCH = $CURRENT_BRANCH ]
+        then
+          echo "Looks like we're in the repo's default branch."
+          echo "I'm going to validate all commits since the last CircleCI run"
+          COMMIT_COUNT=$(git rev-list --count << parameters.git-base-revision >>..<< parameters.git-revision >> )
+          if [ $COMMIT_COUNT -eq 1 ]
+          then
+            echo "-1" > /tmp/logopts.txt
+          else
+            echo "--first-parent << parameters.git-base-revision >>^..<< parameters.git-revision >>" > /tmp/logopts.txt
+          fi
+        else
+          echo "Looks like we're not in the default branch"
+          echo "I'm going to validate all commits in this branch"
+          echo "This will prevent merging secrets into the main branch"
+          FIRST_COMMIT=$(git log $(git merge-base ${DEFAULT_BRANCH} ${CURRENT_BRANCH})..HEAD --pretty=format:%H | tail -n 1)
+          echo "--first-parent ${FIRST_COMMIT}^..<< parameters.git-revision >>" > /tmp/logopts.txt
+
+          if grep -Eq '^--first-parent \^' /tmp/logopts.txt;
+          then
+            echo "-1" > /tmp/logopts.txt
+          fi
+        fi
+        echo "git log options created:"
+        echo "$(cat /tmp/logopts.txt)"
+  - run:
+      name: Check repository for secrets
+      command: |
+        gitleaks --source=<< parameters.path >> detect --config=/app/.gitleaks/custom-config.toml --log-opts="$(cat /tmp/logopts.txt)" --redact --verbose --log-level=debug --exit-code=1 << parameters.options >>

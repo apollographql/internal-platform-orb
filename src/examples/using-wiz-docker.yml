@@ -1,0 +1,57 @@
+description: >
+  An example of using Wiz Docker scanning in your pipeline to check for vulnerabilities.
+
+  Wiz is a security tool owned by the SecOps team to monitor for vulnerabilities, misconfigurations, errors, and incidents
+  occurring in Apollo's public cloud environments.
+
+  Wiz provides the ability to scan built Docker containers for vulnerabilities. Use this job to assess containers
+  as you're building them in your pipeline to ensure the container doesn't contain critical vulnerabilities that should
+  be fixed before the container is used in production.
+
+  Note that this job relies on your container being built already. You will need to tell CircleCI about
+  this dependency via the 'requires' keyword.
+
+  To pass the built container into this orb, you will need to use CircleCI workspaces. This job will scan a tar file containing
+  a docker image saved to <workspace>/container/<name>.tar. This directory should contain exactly one tar.
+
+  A simple example of building the container, saving it to a tar file, exporting it to a workspace, and scanning the container
+  is provided below.
+
+usage:
+  version: 2.1
+  orbs:
+    circleci-pde-orb: apollo-mdg-private/circleci-pde-orb@2.0.9
+  workflows:
+    build-and-scan-container:
+      jobs:
+        - run:
+            name: Set up Workspace directory
+            command:
+              mkdir -p /tmp/workspace/container
+        - run:
+            name: Make a Docker Tag
+            command: |
+              echo "$(date +%Y).$(date +%m).b$CIRCLE_BUILD_NUM" > stable_build_number.txt
+        - run:
+            name: Build Container
+            command: |
+              export IMAGE_TAG=$(cat stable_build_number.txt)
+              docker build \
+                -t registry/MY_CONTAINER_NAME:$IMAGE_TAG \
+                -f Dockerfile .
+        - run:
+            name: Save Container for Analysis
+            command: |
+              export IMAGE_TAG=$(cat stable_build_number.txt)
+              docker save -o /tmp/workspace/container/MY_CONTAINER_NAME.tar \
+                registry/MY_CONTAINER_NAME:$IMAGE_TAG
+        - persist_to_workspace:
+            root: /tmp/workspace
+            paths:
+              - container/MY_CONTAINER_NAME.tar
+        - circleci-pde-orb/wiz-docker:
+            context:
+              - platform-docker-ro
+              - wiz
+            requires:
+              - "Build Container"

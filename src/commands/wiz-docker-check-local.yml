@@ -1,0 +1,30 @@
+description: |
+  Test docker containers against SecOps-defined rules for misconfigurations.
+
+parameters:
+  fail-on-findings:
+    type: boolean
+    description: Indicate if this check should fail if there are any findings >= min-fail-severity
+    default: true
+  workspace-dir:
+    type: string
+    description: The path in the executor where the workspace is mounted.
+  wiz-policies:
+    type: string
+    description: One or more Wiz IAC policies to use during this scan. If specifying multiple, they should be comma-separated
+    default: Apollo-Default-Vulnerabilities-Policy
+
+steps:
+  - run:
+      name: Handle Selected Options
+      command: |
+        echo "export WIZ_POLICIES='<< parameters.wiz-policies >>'" >> "$BASH_ENV"
+        echo "export WORKSPACE_DIR=<< parameters.workspace-dir >>" >> "$BASH_ENV"
+        echo "export WIZ_FAIL_BUILDS=<< parameters.fail-on-findings >>" >> "$BASH_ENV"
+  - run:
+      name: Run Wiz Container Scan
+      command: |
+         python3 /app/run-docker-scan.py
+  - store_artifacts:
+      path: /tmp/wiz-docker.json
+      destination: scan-results/wiz-docker.json

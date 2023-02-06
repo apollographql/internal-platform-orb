@@ -1,0 +1,60 @@
+description: |
+  Test docker containers against SecOps-defined rules for misconfigurations.
+
+  Wiz is a security tool owned by the SecOps team to monitor for vulnerabilities, misconfigurations, errors, and incidents
+  occurring in Apollo's public cloud environments.
+
+  Wiz provides the ability to scan built Docker containers for vulnerabilities. Use this job to assess containers
+  as you're building them in your pipeline to ensure the container doesn't contain vulnerabilities that should
+  be fixed before the container is used in production. SecOps manages the policy used to determine if jobs should pass/fail
+  based on the vulnerabilities found. You can ensure jobs will never fail (regardless of SecOps policy) via the
+  fail-on-findings parameter.
+
+  Note that this job relies on your container being built already. You will need to tell CircleCI about
+  this dependency via the 'requires' keyword.
+
+  To pass the built container into this orb, you will need to save the built container as a tar and use CircleCI workspaces to
+  present the tar to this job. This job will scan a tar file containing a docker image saved to <workspace>/container/<name>.tar.
+  This directory should contain exactly one tar.
+
+  See this job's usage information for an example of building a container, saving it to a tar, exporting it to a workspace,
+  and running this job to scan it.
+
+  Results from this scan are printed to stdout as part of the execution of the job. Additionally, scan results
+  are uploaded as a build artifact to this job.
+
+parameters:
+  fail-on-findings:
+    type: boolean
+    description: Indicate if this check should fail if there are any findings that violate Wiz policy
+    default: true
+  workspace-dir:
+    type: string
+    description: The path in the executor where the workspace should be mounted.
+    default: /tmp/workspace
+  wiz-policies:
+    type: string
+    description: One or more Wiz IAC policies to use during this scan. If specifying multiple, they should be comma-separated
+    default: Apollo-Default-Vulnerabilities-Policy
+
+executor:
+  name: wiz-ci
+
+working_directory: /tmp/project
+
+steps:
+  - setup_remote_docker
+  - attach_workspace:
+      at: << parameters.workspace-dir >>
+  - run:
+      name: Update Wiz
+      command: |
+        python3 /app/install-wiz.py
+  - run:
+      name: Authenticate with Wiz
+      command: |
+        /app/wizcli/wizcli auth --id ${WIZCLI_ID} --secret ${WIZCLI_SECRET}
+  - wiz-docker-check-local:
+      fail-on-findings: << parameters.fail-on-findings >>
+      workspace-dir: << parameters.workspace-dir >>
+      wiz-policies: << parameters.wiz-policies >>

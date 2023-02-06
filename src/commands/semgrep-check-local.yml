@@ -1,0 +1,129 @@
+description: |
+  Run Semgrep against a local repository.
+
+  Semgrep supports scanning all of the common languages in use at Apollo including Kotlin, Java, Typescript, Javascript, Rust, Python, etc.
+  See https://semgrep.dev/docs/supported-languages/ for the list of all supported languages. Languages labelled "Beta" or "Experimental"
+  on the linked page are supported. The differences between these support levels are mainly in the number of semgrep-internal features currently
+  supported for the language and the number of open-source rules available for the language.
+
+  This command will not break builds if an unsupported language is present in the repo being scanned. Rulesets are enabled based on
+  the files in the repository and rules are only executed on files that contain code in supported languages.
+
+  The rules Semgrep executes are versioned here: https://github.com/mdg-private/semgrep-scan/tree/main/rules. SecOps regularly
+  fetches new rules from open-source respositories of high-quality Semgrep rules. Apollo engineers are encouraged to open PRs on the
+  linked repo to contribute new rules as desired.
+
+parameters:
+  path:
+    type: string
+    description: Path to local Git repository
+    default: ${CIRCLE_WORKING_DIRECTORY}
+  options:
+    type: string
+    description: Additional options to pass to the Semgrep CLI
+    default: ''
+  git-base-revision:
+    type: string
+    description: The commit hash of the earliest commit to be scanned
+  run-security-checks:
+    type: boolean
+    description: If true, add security rules to list of checks that semgrep performs
+    default: true
+  run-bestpractice-checks:
+    type: boolean
+    description: If true, add best practice / code-style rules to the list of checks that semgrep performs
+    default: false
+  disabled-signatures:
+    type: string
+    description: A comma-separated list of signatures that you would like to disable
+    default: ''
+  fail-on-findings:
+    type: boolean
+    description: Indicate if this check should fail if there are any findings >= min-fail-severity
+    default: true
+  min-fail-severity:
+    type: enum
+    enum: ['INFO', 'WARNING', 'ERROR']
+    description: The minimum severity of finding that will cause builds to fail.
+    default: ERROR
+  do-diff-scan:
+    type: boolean
+    description: Set to False if you want to scan all files in the repo, not just changed files.
+    default: true
+  update-rules:
+    type: boolean
+    description: |
+      Set to true if rules should be updated prior to scanning. Else, scanning uses the rules built into the executor.
+      Rules are updated from https://github.com/mdg-private/semgrep-scan/tree/main/rules
+    default: true
+
+
+steps:
+  - run:
+      name: Decide which commits to check
+      command: |
+        DEFAULT_BRANCH=$(git rev-parse --abbrev-ref origin/HEAD | cut -c8-)
+        CURRENT_BRANCH=$(git rev-parse --abbrev-ref HEAD)
+        echo "I detected that the default branch is: ${DEFAULT_BRANCH}"
+        echo "I detected that the current branch is: ${CURRENT_BRANCH}"
+        if [ $DEFAULT_BRANCH = $CURRENT_BRANCH ]
+        then
+          echo "Looks like we're in the repo's default branch."
+          echo "I'm going to validate all commits since the last CircleCI run"
+          echo "--baseline-commit << parameters.git-base-revision >>" > /tmp/logopts.txt
+
+        else
+          echo "Looks like we're not in the default branch"
+          echo "I'm going to validate all commits in this branch"
+          FIRST_COMMIT=$(git log $(git merge-base ${DEFAULT_BRANCH} ${CURRENT_BRANCH})..HEAD --pretty=format:%H | tail -n 1)
+          echo "--baseline-commit ${FIRST_COMMIT}" > /tmp/logopts.txt
+
+          if grep -Eq '^--baseline-commit $' /tmp/logopts.txt;
+          then
+            echo "--baseline-commit $(git merge-base ${DEFAULT_BRANCH} ${CURRENT_BRANCH})" > /tmp/logopts.txt
+          fi
+        fi
+        echo "The baseline-commit argument generated is: $(cat /tmp/logopts.txt)"
+  - run:
+      name: Handle Selected Options
+      command: |
+        echo "export SEMGREP_SECURITY_TESTS=<< parameters.run-security-checks >>" >> "$BASH_ENV"
+        echo "export SEMGREP_BESTPRACTICE_TESTS=<< parameters.run-bestpractice-checks >>" >> "$BASH_ENV"
+        echo "export SEMGREP_DISABLED_RULES=<< parameters.disabled-signatures >>" >> "$BASH_ENV"
+        echo "export SEMGREP_SOURCE_PATH=<< parameters.path >>" >> "$BASH_ENV"
+        echo "export FAIL_ON_FINDINGS=<< parameters.fail-on-findings >>" >> "$BASH_ENV"
+        echo "export MIN_FAIL_SEVERITY=<< parameters.min-fail-severity >>" >> "$BASH_ENV"
+        echo "export SEMGREP_DIFF_SCAN=<< parameters.do-diff-scan >>" >> "$BASH_ENV"
+        echo "export UPDATE_RULES=<< parameters.update-rules >>" >> "$BASH_ENV"
+  - run:
+      name: Update Rules
+      command: |
+        if $UPDATE_RULES;
+        then
+          echo $GH_BOT_KEY_B64 | base64 -d > ~/.ssh/apollobot
+          git clone https://apollo-bot2:$(cat ~/.ssh/apollobot)@github.com/mdg-private/semgrep-scan /tmp/semgrep-scan
+          rm -rf /rules/*
+          rm -f ~/.ssh/apollobot
+          mv /tmp/semgrep-scan/rules/* /rules
+          cd /tmp/semgrep-scan
+          echo "Rules Updated to commit $(git rev-parse HEAD)"
+          echo "You can view these rules at: https://github.com/mdg-private/semgrep-scan/tree/$(git rev-parse HEAD)/rules"
+          cd /app
+        fi
+  - run:
+      name: Build Semgrep command
+      command: |
+        python3 /app/build-args.py
+        echo "Semgrep will be run with the following args:"
+        echo "$(cat /tmp/semgrepopts.txt) << parameters.options >>"
+  - run:
+      name: Run Semgrep
+      command: |
+         semgrep scan $(cat /tmp/semgrepopts.txt) << parameters.options >> << parameters.path >>
+  - store_artifacts:
+      path: /tmp/semgrep.json
+      destination: scan-results/semgrep.json
+  - run:
+      name: Results
+      command: |
+        python3 /app/handle-output.py
