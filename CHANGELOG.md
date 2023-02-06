@@ -5,10 +5,15 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 
-## [1.0.19] - 2023-02-06
+## [1.0.20] - 2023-02-06
 ### Added
 
   - The command `circleci-continue-long-job-cancel` can ignore - that is not emit age warings - for workflows where all the on hold (aka yet to be approved approval jobs) have a name containing specified words
+
+## [1.0.19] - 2023-02-06
+### Fixed
+- 1.0.13 introduced a bug with `circleci-continue-long-job-cancel`'s ability to correctly fetch user
+  info for better Slack messages.
 
 ## [1.0.18] - 2023-02-03
 ### Fixed
