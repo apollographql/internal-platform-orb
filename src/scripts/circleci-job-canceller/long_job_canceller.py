@@ -21,12 +21,18 @@ robot_committers = ["apollo-bot2"]
 
 
 def get_workflow_started_by(current_workflow, headers):
-    user_url = f"https://circleci.com/api/v2/user/{current_workflow['started_by']}"
-    user_info = http_get(user_url, headers=headers).json()
-    # the Github / CircleCI scheduling bot won't have a username (JSON body will be {'message': 'Not found.'})
-    username = user_info.get("login", "")
+    user_url = f'https://circleci.com/api/v2/user/{current_workflow["started_by"]}'
 
-    return username
+    try:
+        user_info = http_get(user_url, headers=headers).json()
+        return user_info.get("login")
+    except requests.exceptions.HTTPError as e:
+        print(
+            f'Exception encountered fetching user: {current_workflow["started_by"]} for current_workflow: {current_workflow["id"]}: {e}'
+        )
+        # 4XX
+        # the Github / CircleCI scheduling bot won't have a username (JSON body will be {'message': 'Not found.'})
+        return ''
 
 
 def pipeline_created_at_to_datetime(pipeline):
