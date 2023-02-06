@@ -2,8 +2,12 @@
 
 from Modules.circle_utils import *
 import datetime
-import sys
+import itertools
 import os.path
+import pprint
+import requests
+import sys
+
 
 from dateutil.parser import *
 
@@ -33,6 +37,19 @@ def get_workflow_started_by(current_workflow, headers):
         # 4XX
         # the Github / CircleCI scheduling bot won't have a username (JSON body will be {'message': 'Not found.'})
         return ''
+
+
+def get_workflow_pending_approval_jobs(workflow_id, headers):
+    """
+    the top object of the workflow only tells us that the workflow is on hold, not why.
+    Iterate through all the jobs of the workflow checking in particular for approval jobs
+    and return information about approval jobs in this workflow that are on hold
+    (so then we can filter them later)
+    """
+
+    for current_job in get_all_items(f"/workflow/{workflow_id}/job", headers):
+        if (current_job.get("type") == "approval") and (current_job.get("status") == "on_hold"):
+            yield current_job
 
 
 def pipeline_created_at_to_datetime(pipeline):
@@ -74,7 +91,23 @@ def find_old_workflow_ids(repo_slug, window_start, window_end, headers):
                     yield {"job_status": "too_old", "name": current_workflow['name'], "id": current_workflow['id'], "username": username}
 
 
-def main(circleapitoken, orgreposlug, n_windows, output_file, commit):
+def matches_any_in_list(str, list):
+    for current in list:
+        if ( str.find(current) > -1 ):
+            return True
+    return False
+
+
+def has_only_ignored_jobs(current_info, ignore, headers):
+    for current in get_workflow_pending_approval_jobs(current_info['id'], headers):
+        if not matches_any_in_list(current['name'], ignore):
+          # if we are here then we have a job name that is not filtered by our ignore list
+          # (so we do not _only_ have ignored jobs). Short circuit, the answer to our question is False
+          return False
+    return True
+
+
+def main(circleapitoken, orgreposlug, n_windows, output_file, commit, ignore):
     standard_headers = {"Circle-Token": circleapitoken}
 
     simple_path = os.path.abspath(os.path.expanduser(
@@ -89,6 +122,10 @@ def main(circleapitoken, orgreposlug, n_windows, output_file, commit):
             standard_headers
         ):
             if current_info["job_status"] == "age_warning":
+                if not (ignore == ['']):
+                    if has_only_ignored_jobs(current_info, ignore, standard_headers):
+                        print(f"ignoring workflow: {current_info['id']} See more info at https://app.circleci.com/pipelines/workflows/{current_info['id']}")
+                        continue
                 print(
                     f"midlife warning for workflow ({current_info['name']}), started by gh:{current_info['username']}. See more info at: https://app.circleci.com/pipelines/workflows/{current_info['id']}")
             else:
@@ -120,8 +157,9 @@ if __name__ == "__main__":
                         help="Number of windows to look back across. Default window length is 2 hours.",
                         type=int,
                         default=6)
+    parser.add_argument("--ignore-job-names", help="if all awaiting approval jobs in the pipeline contain this word, do not age warn about it. Multiple word supported by delimiting with , (example: --ignore=optional,maybe). A job only has to match one of the words", default="")
 
     args = parser.parse_args()
 
     main(args.circleapitoken, args.orgreposlug,
-         args.n_windows, args.output_file, args.commit)
+         args.n_windows, args.output_file, args.commit, args.ignore_job_names.split(","))
