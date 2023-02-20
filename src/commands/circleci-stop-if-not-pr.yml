@@ -1,6 +1,6 @@
 description: >-
   Helper command which will `halt` the entire execution of the running `job` if the job
-  is running on a branch without a PR. 
+  is running on a branch without a PR.
 
   Circle's "when" conditions are great, but you could use this as a pre-step in a workflow to avoid executing a job
 
