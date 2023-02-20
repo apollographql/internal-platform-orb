@@ -10,6 +10,10 @@ parameters:
   really-delete-comments:
     type: boolean
     default: true
+  do-when:
+    type: string
+    description: Value passed to "when" parameter on job. Useful to let job run even after a prior step failed
+    default: on_success
 steps:
   - run:
       name: Delete all comments from this user
@@ -33,3 +37,4 @@ steps:
           gh api repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/issues/$PR_NUMBER/comments \
             -q '.[] | select(.user.login == "<< parameters.bot-making-comments >>") | select(.body | startswith("## << parameters.title >>")) | .id' \
           | xargs -I{} -n1 gh api repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/issues/comments/{} -X=DELETE
+      when: << parameters.do-when >>
