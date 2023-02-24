@@ -78,6 +78,8 @@ def find_old_workflow_ids(
             return None
 
         for current_workflow in get_all_items(f"/pipeline/{current_pipeline['id']}/workflow", headers, None):
+            job_status = None
+
             if current_workflow["status"] == "on_hold":
                 created_at_str = current_workflow["created_at"]
                 created_at = isoparse(created_at_str)
@@ -85,16 +87,22 @@ def find_old_workflow_ids(
                 if (created_at < window_end_cancel):
                     username = get_workflow_started_by(
                         current_workflow, headers)
-                    yield {"job_status": "too_old", "name": current_workflow['name'], "id": current_workflow['id'], "username": username}
+                    job_status = "too_old"
 
                 else:
                     username = get_workflow_started_by(
                         current_workflow, headers)
                     if username in robot_committers:
                         continue
+                    job_status = "age_warning"
 
-                    yield {"job_status": "age_warning", "name": current_workflow['name'], "id": current_workflow['id'], "username": username}
-
+            if job_status:
+                yield {
+                    "job_status": "age_warning",
+                    "name": current_workflow['name'],
+                    "id": current_workflow['id'],
+                    "username": username
+                }
 
 
 def matches_any_in_list(str, list):
