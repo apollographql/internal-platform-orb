@@ -83,9 +83,6 @@ def find_old_workflow_ids(
             logging_detail = f'[{created_at}] ({current_workflow["name"]}), started by gh:{username}. See more info at: https://app.circleci.com/pipelines/workflows/{current_workflow["id"]}'
 
             if current_workflow["status"] == "on_hold":
-                created_at_str = current_workflow["created_at"]
-                created_at = isoparse(created_at_str)
-
                 if (created_at < window_end_cancel):
                     print(f'found too old workflow {logging_detail}')
                     job_status = "too_old"
