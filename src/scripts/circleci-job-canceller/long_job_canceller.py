@@ -79,21 +79,21 @@ def find_old_workflow_ids(
 
         for current_workflow in get_all_items(f"/pipeline/{current_pipeline['id']}/workflow", headers, None):
             job_status = None
+            username = get_workflow_started_by(current_workflow, headers)
+            logging_detail = f'[{created_at}] ({current_workflow["name"]}), started by gh:{username}. See more info at: https://app.circleci.com/pipelines/workflows/{current_workflow["id"]}'
 
             if current_workflow["status"] == "on_hold":
                 created_at_str = current_workflow["created_at"]
                 created_at = isoparse(created_at_str)
 
                 if (created_at < window_end_cancel):
-                    username = get_workflow_started_by(
-                        current_workflow, headers)
+                    print(f'found too old workflow {logging_detail}')
                     job_status = "too_old"
 
                 else:
-                    username = get_workflow_started_by(
-                        current_workflow, headers)
                     if username in robot_committers:
                         continue
+                    print(f'midlife warning for workflow {logging_detail}')
                     job_status = "age_warning"
 
             if job_status:
@@ -139,13 +139,10 @@ def main(circleapitoken, orgreposlug, n_windows, output_file, commit, ignore):
             if current_info["job_status"] == "age_warning":
                 if not (ignore == ['']):
                     if has_only_ignored_jobs(current_info, ignore, standard_headers):
-                        print(f"ignoring workflow: {current_info['id']} See more info at https://app.circleci.com/pipelines/workflows/{current_info['id']}")
+                        print(
+                            f"ignoring workflow: {current_info['id']} See more info at https://app.circleci.com/pipelines/workflows/{current_info['id']}")
                         continue
-                print(
-                    f"midlife warning for workflow ({current_info['name']}), started by gh:{current_info['username']}. See more info at: https://app.circleci.com/pipelines/workflows/{current_info['id']}")
             else:
-                print(
-                    f"found too old workflow: {current_info['id']} ({current_info['name']}) See more info at: https://app.circleci.com/pipelines/workflows/{current_info['id']}")
                 if commit:
                     http_post(
                         f"https://circleci.com/api/v2/workflow/{current_info['id']}/cancel", headers=standard_headers)
