@@ -15,7 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- The command `circleci-continue-long-job-cancel` can ignore - that is not emit age warings - for workflows where all the on hold (aka yet to be approved approval jobs) have a name containing specified words
+- The command `circleci-continue-long-job-cancel` can ignore - that is not emit age warnings - for workflows where all the on hold (aka yet to be approved approval jobs) have a name containing specified words
 
 ## [1.0.19] - 2023-02-06
 
@@ -28,7 +28,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- further reduce the size of code generated during slack-notify-compact command
+- further reduce the size of code generated during `slack-notify-compact` command
 - setup command only downloads repository once
 
 ## [1.0.17] - 2023-01-27
@@ -71,18 +71,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- circleci-stop-if command
+- `circleci-stop-if` command
 
 ### Changed
 
 - modifications to this orb now require updated CHANGELOG. Versions before this point will be documented in a best effort approach, going forward changelog entries are enforced.
-- slack-circleci-build has an optional who-did-it parameter which allows overriding author information
+- `slack-circleci-build` has an optional who-did-it parameter which allows overriding author information
 
 ## [1.0.11] - 2023-01-03
 
 ### Changed
 
-- slack-circleci-build has an optional link parameter in case the default Circle URL does not work for your use case
+- `slack-circleci-build` has an optional link parameter in case the default Circle URL does not work for your use case
 
 ## [1.0.10] - 2022-12-07
 
