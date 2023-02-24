@@ -90,9 +90,10 @@ def find_old_workflow_ids(
                     print(f'found too old workflow {logging_detail}')
                     job_status = "too_old"
 
+                elif username in robot_committers:
+                    continue
+
                 else:
-                    if username in robot_committers:
-                        continue
                     print(f'midlife warning for workflow {logging_detail}')
                     job_status = "age_warning"
 
