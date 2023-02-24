@@ -60,12 +60,17 @@ def pipeline_created_at_to_datetime(pipeline):
     return datetime.datetime.fromisoformat(pipeline['created_at'][:-1]).replace(tzinfo=datetime.timezone.utc)
 
 
-def find_old_workflow_ids(repo_slug, window_start, window_end, headers):
-    print(f'Window to paginate through: [{window_start}, {window_end}]')
+def find_old_workflow_ids(
+        repo_slug,
+        window_start,
+        window_end_cancel,
+        window_end_warn,
+        headers):
+    print(f'Window to paginate through: [start:{window_start}, cancel:{window_end_cancel}, warn:{window_end_warn}]')
     for current_pipeline in get_all_items(f"/project/gh/{repo_slug}/pipeline", headers, None):
         # Paginate through only those pipelines which started inside our given window
         created_at = pipeline_created_at_to_datetime(current_pipeline)
-        if window_end < created_at:
+        if window_end_warn < created_at:
             print(f'Pipeline too young: {created_at}')
             continue
         if created_at < window_start:
@@ -77,12 +82,12 @@ def find_old_workflow_ids(repo_slug, window_start, window_end, headers):
                 created_at_str = current_workflow["created_at"]
                 created_at = isoparse(created_at_str)
 
-                if (created_at < (now - job_life_clock)):
+                if (created_at < window_end_cancel):
                     username = get_workflow_started_by(
                         current_workflow, headers)
                     yield {"job_status": "too_old", "name": current_workflow['name'], "id": current_workflow['id'], "username": username}
 
-                if (created_at < (now - job_midlife_warning)):
+                else:
                     username = get_workflow_started_by(
                         current_workflow, headers)
                     if username in robot_committers:
@@ -119,6 +124,7 @@ def main(circleapitoken, orgreposlug, n_windows, output_file, commit, ignore):
         for current_info in find_old_workflow_ids(
             orgreposlug,
             now - (job_life_clock * n_windows),
+            now - job_life_clock,
             now - job_midlife_warning,
             standard_headers
         ):
