@@ -77,7 +77,12 @@ def find_old_workflow_ids(repo_slug, window_start, window_end, headers):
                 created_at_str = current_workflow["created_at"]
                 created_at = isoparse(created_at_str)
 
-                if ((created_at < (now - job_midlife_warning)) and (created_at > (now - job_life_clock))):
+                if (created_at < (now - job_life_clock)):
+                    username = get_workflow_started_by(
+                        current_workflow, headers)
+                    yield {"job_status": "too_old", "name": current_workflow['name'], "id": current_workflow['id'], "username": username}
+
+                if (created_at < (now - job_midlife_warning)):
                     username = get_workflow_started_by(
                         current_workflow, headers)
                     if username in robot_committers:
@@ -85,10 +90,6 @@ def find_old_workflow_ids(repo_slug, window_start, window_end, headers):
 
                     yield {"job_status": "age_warning", "name": current_workflow['name'], "id": current_workflow['id'], "username": username}
 
-                if (created_at < (now - job_life_clock)):
-                    username = get_workflow_started_by(
-                        current_workflow, headers)
-                    yield {"job_status": "too_old", "name": current_workflow['name'], "id": current_workflow['id'], "username": username}
 
 
 def matches_any_in_list(str, list):
