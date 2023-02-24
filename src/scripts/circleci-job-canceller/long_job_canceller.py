@@ -66,7 +66,8 @@ def find_old_workflow_ids(
         window_end_cancel,
         window_end_warn,
         headers):
-    print(f'Window to paginate through: [start:{window_start}, cancel:{window_end_cancel}, warn:{window_end_warn}]')
+    print(
+        f'Window to paginate through: [start:{window_start}, cancel:{window_end_cancel}, warn:{window_end_warn}]')
     for current_pipeline in get_all_items(f"/project/gh/{repo_slug}/pipeline", headers, None):
         # Paginate through only those pipelines which started inside our given window
         created_at = pipeline_created_at_to_datetime(current_pipeline)
@@ -105,7 +106,7 @@ def find_old_workflow_ids(
 
 def matches_any_in_list(str, list):
     for current in list:
-        if ( str.find(current) > -1 ):
+        if (str.find(current) > -1):
             return True
     return False
 
@@ -113,9 +114,9 @@ def matches_any_in_list(str, list):
 def has_only_ignored_jobs(current_info, ignore, headers):
     for current in get_workflow_pending_approval_jobs(current_info['id'], headers):
         if not matches_any_in_list(current['name'], ignore):
-          # if we are here then we have a job name that is not filtered by our ignore list
-          # (so we do not _only_ have ignored jobs). Short circuit, the answer to our question is False
-          return False
+            # if we are here then we have a job name that is not filtered by our ignore list
+            # (so we do not _only_ have ignored jobs). Short circuit, the answer to our question is False
+            return False
     return True
 
 
