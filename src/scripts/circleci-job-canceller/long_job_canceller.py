@@ -80,9 +80,9 @@ def find_old_workflow_ids(
         for current_workflow in get_all_items(f"/pipeline/{current_pipeline['id']}/workflow", headers, None):
             job_status = None
             username = get_workflow_started_by(current_workflow, headers)
-            logging_detail = f'[{created_at}] ({current_workflow["name"]}), started by gh:{username}. See more info at: https://app.circleci.com/pipelines/workflows/{current_workflow["id"]}'
+            logging_detail = f'[{created_at}] ({current_workflow["name"]})[{current_workflow["status"]}], started by gh:{username}. See more info at: https://app.circleci.com/pipelines/workflows/{current_workflow["id"]}'
 
-            if current_workflow["status"] == "on_hold":
+            if not current_workflow.get('stopped_at'):
                 if (created_at < window_end_cancel):
                     print(f'found too old workflow {logging_detail}')
                     job_status = "too_old"
@@ -90,7 +90,7 @@ def find_old_workflow_ids(
                 elif username in robot_committers:
                     continue
 
-                else:
+                elif current_workflow['status'] == 'on_hold':
                     print(f'midlife warning for workflow {logging_detail}')
                     job_status = "age_warning"
 
