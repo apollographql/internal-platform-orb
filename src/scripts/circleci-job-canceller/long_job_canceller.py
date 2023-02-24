@@ -97,7 +97,7 @@ def find_old_workflow_ids(
 
             if job_status:
                 yield {
-                    "job_status": "age_warning",
+                    "job_status": job_status,
                     "name": current_workflow['name'],
                     "id": current_workflow['id'],
                     "username": username
