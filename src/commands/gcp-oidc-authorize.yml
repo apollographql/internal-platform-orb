@@ -22,7 +22,7 @@ parameters:
     description: "Configure the environment to use the retrieved credentials as the Application Default Creds (ADC). This option does not work if delete-cred-file is true"
   delete-cred-file:
     type: enum
-    default: "true"
+    default: "false"
     enum: ["false", "true"]
     description: delete the credentials file
   project-id:
