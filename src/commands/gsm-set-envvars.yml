@@ -6,7 +6,7 @@ parameters:
 
 steps:
   - run:
-      name: Set Envvars via secret(s)
+      name: Retrieve and write secret
       command: |
         echo "<< parameters.envvar-secret-map >>" | sed -n 1'p' | tr ',' '\n' | while read word; do
           IFS='=' read -r -a array \<<< $word
