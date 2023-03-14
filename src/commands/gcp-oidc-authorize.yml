@@ -57,7 +57,7 @@ steps:
         echo $CIRCLE_OIDC_TOKEN > << parameters.oidc-token-file-path >>
         # Create a credential config for the generated OIDC ID Token
         gcloud iam workload-identity-pools create-cred-config \
-          "projects/${<< parameters.project-id >>}/locations/global/workloadIdentityPools/${<< parameters.workload-identity-pool-id >>}/providers/${<< parameters.workload-identity-pool-provider-id >>}"\
+          "projects/${<< parameters.project-id >>}/locations/global/workloadIdentityPools/${<< parameters.workload-identity-pool-id >>}/providers/${<< parameters.workload-identity-pool-provider-id >>}" \
           --output-file="<< parameters.gcp-cred-config-file-path >>" \
           --service-account="${<< parameters.service-account-email >>}" \
           --credential-source-file=<< parameters.oidc-token-file-path >>
