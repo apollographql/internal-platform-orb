@@ -81,7 +81,7 @@ steps:
   - run:
       name: Set up Application Default Credentials (ADC)
       command: |
-        if [-n "<< parameters.do-activate-application-default-creds >>"]; then
+        if [ -n "<< parameters.do-activate-application-default-creds >>" ]; then
           echo "export GOOGLE_APPLICATION_CREDENTIALS='<< parameters.gcp-cred-config-file-path >>'" | tee -a "$BASH_ENV"
         fi
   - run:
