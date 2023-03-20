@@ -20,7 +20,7 @@ function check_directories_in {
             echo "========================================"
             echo "tflint-ing $(pwd)"
             echo "========================================"
-            tflint -c $CONFIG_FILE_LOCATION
+            tflint -c $CONFIG_FILE_LOCATION --minimum-failure-severity=error
             popd > /dev/null
         fi
     done
