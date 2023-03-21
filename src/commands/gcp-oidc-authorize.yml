@@ -72,7 +72,8 @@ steps:
         fi
 
         if [ -n "<< parameters.do-helm-login >>" ]; then
-          cat /tmp/google_auth.json | helm registry login -u _json_key --password-stdin https://us-central1-docker.pkg.dev
+        export GOOGLE_APPLICATION_CREDENTIALS="<< parameters.gcp-cred-config-file-path >>"
+        gcloud auth application-default print-access-token | helm registry login -u oauth2accesstoken --password-stdin https://us-central1-docker.pkg.dev
         fi
 
         if [ -n "<< parameters.do-activate-service-account >>" ]; then
