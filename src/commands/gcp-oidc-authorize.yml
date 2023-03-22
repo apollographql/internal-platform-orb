@@ -43,11 +43,11 @@ parameters:
     description: The name of the environment variable containing the service account email to use to authenticate to GCP
   gcp-cred-config-file-path:
     type: string
-    default: /home/circleci/gcp_cred_config.json
+    default: /tmp/circleci-gcp_cred_config.json
     description: The full path to the file used to store GCP OIDC Authentication configuration. This is an internal value and should only be changed if the default file conflicts with your needs
   oidc-token-file-path:
     type: string
-    default: /home/circleci/oidc_token.json
+    default: /tmp/circleci-oidc_token.json
     description: The full path to the file used to store the CCI-provided OIDC token. This is an internal value and should only be changed if the default file conflicts with your needs
 steps:
   - run:
