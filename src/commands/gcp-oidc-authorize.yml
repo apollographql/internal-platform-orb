@@ -10,11 +10,6 @@ parameters:
     default: ""
     enum: ["", "true"]
     description: "Have Helm use the retrieved creds to log into Google Artifact Registry, using Helm's support for OCI registries."
-  do-activate-service-account:
-    type: enum
-    default: ""
-    enum: ["", "true"]
-    description: "This is a service account that should be authed"
   do-activate-application-default-creds:
     type: enum
     default: ""
@@ -74,10 +69,6 @@ steps:
         if [ -n "<< parameters.do-helm-login >>" ]; then
         export GOOGLE_APPLICATION_CREDENTIALS="<< parameters.gcp-cred-config-file-path >>"
         gcloud auth application-default print-access-token | helm registry login -u oauth2accesstoken --password-stdin https://us-central1-docker.pkg.dev
-        fi
-
-        if [ -n "<< parameters.do-activate-service-account >>" ]; then
-          gcloud auth activate-service-account --key-file /tmp/google_auth.json
         fi
   - run:
       name: Set up Application Default Credentials (ADC)
