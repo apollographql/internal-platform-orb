@@ -74,7 +74,8 @@ steps:
       name: Set up Application Default Credentials (ADC)
       command: |
         if [ -n "<< parameters.do-activate-application-default-creds >>" ]; then
-          echo "export GOOGLE_APPLICATION_CREDENTIALS='<< parameters.gcp-cred-config-file-path >>'" | tee -a "$BASH_ENV"
+          export GOOGLE_APPLICATION_CREDENTIALS="${SECOPS_GCP_CRED_FILE}"
+          echo "export GOOGLE_APPLICATION_CREDENTIALS='<< parameters.gcp-cred-config-file-path >>'" >> "$BASH_ENV"
         fi
   - run:
       name: Delete cred files
