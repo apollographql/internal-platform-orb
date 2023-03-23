@@ -1,4 +1,4 @@
-description: Renames an environment variable and optionally removes the old environment variable. 
+description: Renames an environment variable and optionally removes the old environment variable.
 parameters:
   old-variable:
     type: env_var_name
@@ -18,6 +18,6 @@ steps:
         export << parameters.new-variable >>="${<< parameters.old-variable >>}"
         echo "export << parameters.new-variable >>=\"${<< parameters.old-variable >>}\"" >> $BASH_ENV
         if [[ -n << parameters.clean >> ]]; then
-          unset << parameters.old-name >>
-          sed -i '/<< parameters.old-name >>/d' $BASH_ENV
+          unset << parameters.old-variable >>
+          sed -i '/<< parameters.old-variable >>/d' $BASH_ENV
         fi
