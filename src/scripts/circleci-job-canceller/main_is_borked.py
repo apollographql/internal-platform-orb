@@ -16,7 +16,7 @@ sys.path.append("..")  # added!
 #http.client.HTTPConnection.debuglevel = 1
 
 
-oncall_subteam = "<!subteam^SFNQZTE4Q>"
+oncall_subteam = "<!subteam^S050XSUA7QU>"
 robot_committers = ["apollo-bot2"]
 
 leave_pending_jobs_for = datetime.timedelta(hours=1)
