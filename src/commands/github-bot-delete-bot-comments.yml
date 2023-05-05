@@ -41,7 +41,7 @@ steps:
           COMMENT_IDS=`gh api repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/issues/$PR_NUMBER/comments \
             -q '.[] | select(.user.login == "<< parameters.bot-making-comments >>") | select(.body | startswith("## << parameters.title >>")) | .id'`
           COMMENT_IDS_ARRAY=( $COMMENT_IDS )
-          if [ ${#COMMENT_IDS_ARRAY[@]} -ne 0 ]; then
+          if [ ${#COMMENT_IDS_ARRAY[@]} -ne 0 ] && [ "<< parameters.skip-last >>" == "true" ]; then
               unset COMMENT_IDS_ARRAY[${#COMMENT_IDS_ARRAY[@]}-1]
           fi
           for id in "${COMMENT_IDS_ARRAY[@]}"
