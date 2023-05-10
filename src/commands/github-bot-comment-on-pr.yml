@@ -37,6 +37,9 @@ steps:
         echo "## << parameters.title >>" > /tmp/preamble.txt
         cat /tmp/preamble.txt /tmp/notification.txt > /tmp/constructed_forslack.txt
 
+        PR_NUMBER=$(echo "$CIRCLE_PULL_REQUEST" | cut -d '/' -f 7)
+        echo $CIRCLE_PULL_REQUEST $PR_NUMBER
+
         COMMENT_IDS=`gh api repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/issues/$PR_NUMBER/comments \
           -q '.[] | select(.user.login == "<< parameters.bot-making-comments >>") | select(.body | startswith("## << parameters.title >>")) | .id'`
         COMMENT_IDS_ARRAY=( $COMMENT_IDS )
