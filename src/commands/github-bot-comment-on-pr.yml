@@ -6,7 +6,7 @@ parameters:
     type: string
   command:
     type: string
-    description: A command which must produce a /tmp/notification.txt file. If no, or empty file, produced step is halted. It may also produce a /tmp/report.md file with more details, which will be linked as a secret gist.
+    description: A command which must produce a /tmp/notification.txt file. If no, or empty file, produced step is halted. The command optionally may produce a /tmp/report.md file, which will be linked as a secret gist, designed to give an optional level of detail to your users.
   update-last:
     type: boolean
     description: Update the last comment from this bot with this title instead of creating a new one
