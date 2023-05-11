@@ -12,7 +12,7 @@ parameters:
     default: true
   skip-last:
     type: boolean
-    description: Update the last comment from this bot with this title instead of creating a new one
+    description: if true, delete every comment except the last one
     default: false
   do-when:
     type: string
