@@ -36,6 +36,10 @@ parameters:
     type: boolean
     default: true
     description: "Delete comments previously made by the delete-bot-comments bot"
+  update-last:
+    type: boolean
+    description: Update the last comment from this bot with this title instead of creating a new one
+    default: false
 docker:
   - image: cimg/base:stable
 resource_class: small
@@ -55,6 +59,7 @@ steps:
       title: << parameters.title >>
       bot-making-comments: << parameters.bot-making-comments >>
       really-delete-comments: << parameters.delete-bot-comments >>
+      skip-last: << parameters.update-last >>
   - proceed-if-changes:
       path: << parameters.path >>
       name-filter: << parameters.name-filter >>
@@ -63,5 +68,7 @@ steps:
   - github-bot-comment-on-pr:
       title: << parameters.title >>
       command: << parameters.notification-command >>
+      bot-making-comments: << parameters.bot-making-comments >>
+      update-last: << parameters.update-last >>
   - store_artifacts:
      path: /tmp/notification.txt
