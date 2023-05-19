@@ -114,8 +114,11 @@ def main(githubtoken, orgreposlug, circleapitoken):
         # regardless main's HEAD commit spends most of its time here, experimentally
         pending_workflows = []
         [pending_workflows.append(x) for x in commit_info.get("status").get("contexts") if (
-            ((x.get("state") == "PENDING") and ("ci/circleci" in x.get("context"))) and not("dev0" in x.get("context")))]
-        # pending workflows targetting dev0 don't deserve a callout by themselves
+            ((x.get("state") == "PENDING") and ("ci/circleci" in x.get("context"))) and ("to prod?" in x.get("context")))]
+        # only pending workflows to PROD deserve a callback
+        # note that this is specially worded: "to prod?" to catch only approval jobs asking if we want to deploy to prod
+        # pending workflows without "to prod?" may be something else: pending deploys to other environments or pending
+        # workflows asking about "rollback SERVICENAME prod?"
 
         if (len(pending_workflows) > 0):
             jobs_started_str = pending_workflows[0].get("createdAt")
