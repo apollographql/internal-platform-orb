@@ -59,12 +59,11 @@ steps:
             gh pr comment "$CIRCLE_PULL_REQUEST" -F /tmp/constructed_forslack.txt
         else
             echo comment exists, update: $LAST
-            body=`cat /tmp/constructed_forslack.txt`
             gh api --method PATCH \
                 -H "Accept: application/vnd.github+json" \
                 -H "X-GitHub-Api-Version: 2022-11-28" \
                 /repos/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME/issues/comments/$LAST \
-                -f body="$body"
+                -F body=@/tmp/constructed_forslack.txt
         fi
 
       when: << parameters.do-when >>

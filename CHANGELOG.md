@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.5] - 2023-05-31
+
+- `github-bot-comment-on-pr` can now update comments with longer text without running into command line length limits.
+
 ## [1.2.4] - 2023-05-18
 
 - circleci-job-cancelled "`main_is_borked`" script only alerts on awaiting approval jobs "to prod?" vs previous logic (which was targetting anything not our first (internal) deploy environment. This should be more generic and avoid some issues internally we were seeing with alerting people about irrelevant things.
