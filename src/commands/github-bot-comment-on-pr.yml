@@ -40,7 +40,9 @@ steps:
         if [ $(du -k /tmp/constructed_forslack.txt | cut -f1) -gt 65 ]; then
            # get file size in K. 65K is too big for Github Pull Requests Comments (API errors)
            cp /tmp/constructed_forslack.txt /tmp/report.md
-           echo "Github comment limit exceeded" > /tmp/constructed_forslack.txt
+
+           echo "## << parameters.title >>" > /tmp/constructed_forslack.txt
+           echo -n "Github comment limit exceeded: " >> /tmp/constructed_forslack.txt
         fi
 
         if [ -f /tmp/report.md ]; then
