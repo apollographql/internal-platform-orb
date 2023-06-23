@@ -19,8 +19,9 @@ parameters:
     description: Value passed to "when" parameter on job. Useful to let job run even after a prior step failed
     default: on_success
   send-over-limit-output:
+    description: If the total size of /tmp/notification.txt is larger than Github Pull Request comment limits, instead output the content to this location.
     type: enum
-    enum: ["gist", "print"]
+    enum: ["report.md", "print"]
     default: "print"
 steps:
   - run:
@@ -43,7 +44,7 @@ steps:
 
         if [ $(du -k /tmp/constructed_forslack.txt | cut -f1) -gt 65 ]; then
            # get file size in K. 65K is too big for Github Pull Requests Comments (API errors)
-           if [ "<< parameters.send-over-limit-output >>" = "gist" ]; then
+           if [ "<< parameters.send-over-limit-output >>" = "report.md" ]; then
                cp /tmp/constructed_forslack.txt /tmp/report.md
 
                echo "## << parameters.title >>" > /tmp/constructed_forslack.txt
@@ -54,7 +55,7 @@ steps:
                cat /tmp/constructed_forslack.txt
 
                echo "## << parameters.title >>" > /tmp/constructed_forslack.txt
-               echo "Output redirected to be in the build step output of the 'Comment in PR' build [in your Circle build]($CIRCLE_BUILD_URL)" >> /tmp/constructed_forslack.txt
+               echo "Output redirected to be in the build step output of the 'Comment in PR' build [in your Circle build]($CIRCLE_BUILD_URL), as otherwise comment would be too long." >> /tmp/constructed_forslack.txt
             fi
         fi
 
