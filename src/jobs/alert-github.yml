@@ -8,7 +8,7 @@ parameters:
     description: 'Title to be given to this PR comment in Github.'
   notification-command:
     type: string
-    description: 'Bash command which will be run to generate the markdown payload to comment on the PR in Github. Command must send desired output to /tmp/notification.txt '
+    description: 'Bash command which will be run to generate the markdown payload to comment on the PR in Github. Command must send desired output to /tmp/notification.txt OR may send output to /tmp/report.md, which will be used to create a secret gist.'
   path:
     type: string
     description: '`path` parameter to be passed to `proceed-if-changes`'
@@ -40,6 +40,10 @@ parameters:
     type: boolean
     description: Update the last comment from this bot with this title instead of creating a new one
     default: false
+  overlarge-content-to:
+    type: enum
+    enum: ["report.md", "print"]
+    default: "print"
 docker:
   - image: cimg/base:stable
 resource_class: small
@@ -70,5 +74,6 @@ steps:
       command: << parameters.notification-command >>
       bot-making-comments: << parameters.bot-making-comments >>
       update-last: << parameters.update-last >>
+      overlarge-content-to: << parameters.overlarge-content-to >>
   - store_artifacts:
      path: /tmp/notification.txt
