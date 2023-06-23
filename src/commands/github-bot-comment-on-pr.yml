@@ -50,7 +50,7 @@ steps:
                echo "Output redirected to the full report, linked below, as otherwise comment would be too long." >> /tmp/constructed_forslack.txt
             fi
 
-            if [ "<< parameters.send-over-limit-ouput >>" = "print" ]; then
+            if [ "<< parameters.send-over-limit-output >>" = "print" ]; then
                cat /tmp/constructed_for_slack.txt
 
                echo "## << parameters.title >>" > /tmp/constructed_forslack.txt
