@@ -37,8 +37,8 @@ steps:
         echo "## << parameters.title >>" > /tmp/preamble.txt
         cat /tmp/preamble.txt /tmp/notification.txt > /tmp/constructed_forslack.txt
 
-        if [ $(du -k /tmp/constructed_forslack.txt | cut -f1) -gt 65000 ]; then
-           # too big for Github Pull Requests Comments
+        if [ $(du -k /tmp/constructed_forslack.txt | cut -f1) -gt 65 ]; then
+           # get file size in K. 65K is too big for Github Pull Requests Comments (API errors)
            cp /tmp/constructed_forslack.txt /tmp/report.md
            echo "Github comment limit exceeded" > /tmp/constructed_forslack.txt
         fi
