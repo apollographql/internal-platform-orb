@@ -37,6 +37,12 @@ steps:
         echo "## << parameters.title >>" > /tmp/preamble.txt
         cat /tmp/preamble.txt /tmp/notification.txt > /tmp/constructed_forslack.txt
 
+        if [ $(du -k /tmp/constructed_forslack.txt | cut -f1) -gt 65000 ]; then
+           # too big for Github Pull Requests Comments
+           cp /tmp/constructed_forslack.txt /tmp/report.md
+           echo "Github comment limit exceeded" > /tmp/constructed_forslack.txt
+        fi
+
         if [ -f /tmp/report.md ]; then
           GIST_URL=$(gh gist create /tmp/report.md)
           echo >>/tmp/constructed_forslack.txt
