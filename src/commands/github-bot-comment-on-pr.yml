@@ -42,7 +42,7 @@ steps:
            cp /tmp/constructed_forslack.txt /tmp/report.md
 
            echo "## << parameters.title >>" > /tmp/constructed_forslack.txt
-           echo -n "Github comment limit exceeded: " >> /tmp/constructed_forslack.txt
+           echo "Output redirected to the full report, linked below, as otherwise comment would be too long." >> /tmp/constructed_forslack.txt
         fi
 
         if [ -f /tmp/report.md ]; then
