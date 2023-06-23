@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.6] - 2023-06-23
+
+- `github-bot-comment-on-pr` now handles comments that are too long for inline Github PR comments, by posting to a secret Github Gist and linking from the comment.
+
 ## [1.2.5] - 2023-05-31
 
 - `github-bot-comment-on-pr` can now update comments with longer text without running into command line length limits.
