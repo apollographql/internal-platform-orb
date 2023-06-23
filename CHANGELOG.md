@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.2.6] - 2023-06-23
 
-- `github-bot-comment-on-pr` now handles comments that are too long for inline Github PR comments, by posting to a secret Github Gist and linking from the comment.
+- `github-bot-comment-on-pr` (command) and `alert-github` (job) better handle comments that are too long for inline Github PR comments. You may post to a secret gist (use the "report.md" option), or print inline (using the "print" option, the default), by using the `overlarge-content-to` parameter.
 
 ## [1.2.5] - 2023-05-31
 
