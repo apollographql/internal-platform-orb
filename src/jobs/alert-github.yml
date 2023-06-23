@@ -74,6 +74,6 @@ steps:
       command: << parameters.notification-command >>
       bot-making-comments: << parameters.bot-making-comments >>
       update-last: << parameters.update-last >>
-      send-over-limit-output: << parameters.overlarge-content-to >>
+      overlarge-content-to: << parameters.overlarge-content-to >>
   - store_artifacts:
      path: /tmp/notification.txt
