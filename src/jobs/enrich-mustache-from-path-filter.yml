@@ -32,6 +32,7 @@ parameters:
   pre-process-command:
     description: allows you to insert a command after set-parameters has generated a JSON file. Useful for post-processing same (ie with jq's + command)
     default: ""
+    type: string
   mapping:
     description: >-
       Like path-filtering, the format is:
