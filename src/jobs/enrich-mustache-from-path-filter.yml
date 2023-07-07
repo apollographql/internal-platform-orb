@@ -29,6 +29,9 @@ parameters:
   config-path:
     description: Location of the (mustache enriched) config file
     type: string
+  pre-process-command:
+    description: allows you to insert a command after set-parameters has generated a JSON file. Useful for post-processing same (ie with jq's + command)
+    default: ""
   mapping:
     description: >-
       Like path-filtering, the format is:
@@ -56,6 +59,7 @@ parameters:
         path-filtering behavior: given two matches the last one wins.
         Which is the last one? Potentially undefined behavior.
 
+        The resulting output will be written to /tmp/enrich-parameters.json
 
     type: string
 steps:
@@ -65,6 +69,13 @@ steps:
       base-revision: << parameters.base-revision >>
       output-path: << parameters.config-path >>
       mapping: << parameters.mapping >>
+  - run:
+      name: pre process command
+      command: << parameters.pre-process-command >>
+  - run:
+      name: debugging output (enrich-parameters)
+      command: cat /tmp/enrich-parameters.json
+
   - enrich-mustache:
       json-data-file-path: /tmp/enrich-parameters.json
       template-file-path: << parameters.config-path >>
@@ -72,8 +83,5 @@ steps:
   - run:
       name: debugging output (pipeline)
       command: cat /tmp/generated_pipeline.yml
-  - run:
-      name: debugging output (enrich-parameters)
-      command: cat /tmp/enrich-parameters.json
   - continuation/continue:
       configuration_path: /tmp/generated_pipeline.yml

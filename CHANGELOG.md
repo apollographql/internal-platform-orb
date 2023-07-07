@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.2.7] - 2023-07-07
+
+- `enrich-mustache-from-path-file` now includes a `pre-process-command` which is executed right before rendering the specified config file's mustache template. On a side note, have you heard about `jq`'s `+` operator?
+- `gcp-authorize` now works on MacOS based executors
+- `circleci-stop-if-not`, to compliment `circleci-stop-if`
+
 ## [1.2.6] - 2023-06-23
 
 - `github-bot-comment-on-pr` (command) and `alert-github` (job) better handle comments that are too long for inline Github PR comments. You may post to a secret gist (use the "report.md" option), or print inline (using the "print" option, the default), by using the `overlarge-content-to` parameter.
