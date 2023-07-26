@@ -39,7 +39,11 @@ steps:
           # not base64 encoded? Great!
           echo "does not need base64 decoding"
         else
-          base64 -d --ignore-garbage -i /tmp/google_auth.json > /tmp/google_auth_decoded.json
+          if [ "$(uname)" = "Darwin" ]; then
+              base64 -d -i /tmp/google_auth.json -o /tmp/google_auth_decoded.json
+          else
+              base64 -d --ignore-garbage -i /tmp/google_auth.json > /tmp/google_auth_decoded.json
+          fi
           mv /tmp/google_auth_decoded.json /tmp/google_auth.json
         fi
   - run:

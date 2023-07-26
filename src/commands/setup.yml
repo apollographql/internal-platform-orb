@@ -16,5 +16,3 @@ steps:
           mkdir -p /tmp/apollo_internal_platform_orb
           tar -xzvf /tmp/source.tar.gz -C /tmp/apollo_internal_platform_orb --strip-components=1
         fi
-  - store_artifacts:
-     path: /tmp/apollo_internal_platform_orb

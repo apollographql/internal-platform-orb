@@ -11,6 +11,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added `gcp-oidc-authorize` as a new option for authenticating to GCP. This uses Open Identity Connect (OIDC) and the Identity Provider (IdP) that Circle makes available to jobs to authenticate to GCP. See [Circle's Docs](https://circleci.com/docs/openid-connect-tokens/#google-cloud-platform) for more info
 
+## [1.2.7] - 2023-07-07
+
+- `enrich-mustache-from-path-file` now includes a `pre-process-command` which is executed right before rendering the specified config file's mustache template. On a side note, have you heard about `jq`'s `+` operator?
+- `gcp-authorize` now works on MacOS based executors
+- `circleci-stop-if-not`, to compliment `circleci-stop-if`
+
+## [1.2.6] - 2023-06-23
+
+- `github-bot-comment-on-pr` (command) and `alert-github` (job) better handle comments that are too long for inline Github PR comments. You may post to a secret gist (use the "report.md" option), or print inline (using the "print" option, the default), by using the `overlarge-content-to` parameter.
+
+## [1.2.5] - 2023-05-31
+
+- `github-bot-comment-on-pr` can now update comments with longer text without running into command line length limits.
+
+## [1.2.4] - 2023-05-18
+
+- circleci-job-cancelled "`main_is_borked`" script only alerts on awaiting approval jobs "to prod?" vs previous logic (which was targetting anything not our first (internal) deploy environment. This should be more generic and avoid some issues internally we were seeing with alerting people about irrelevant things.
+
+## [1.2.3] - 2023-05-18
+
+- setup command no longer saves the downloaded files as artifacts in Circle.
+
+## [1.2.2] - 2023-05-11
+
+- The command for `github-bot-comment-on-pr` may write `report.md` in addition to `/tmp/notification.txt`; if it does, it is posted as a secret GitHub Gist and linked from the comment.
+
+## [1.2.1] - 2023-05-11
+
+- Add optional argument to alert-github and github-bot-comment-on-pr `update-last` that will update the last comment instead of deleting and adding a new comment.
+- Add optional argument to github-bot-delete-bot-comments `skip-last` that will delete all but the last comment.
+
+## [1.1.0] - 2023-03-20
+
+- Only fail tflint checks when error occurs instead of warnings
+
 ## [1.0.22] - 2023-02-24
 
 ### Changed
