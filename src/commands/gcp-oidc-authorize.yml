@@ -1,0 +1,86 @@
+description: Authorize the GCP CLI using OIDC rather than receiving a service account's credentials via environment variable. This command creates an ephemeral GCP session by leveraging GCP Workload Identity. Workload Identity must be configured in the project you are attempting to authenticate to prior to using this command. Additionally, you will need to have installed the gcloud command line utility in your CI execution environment prior to using this command. This is a enhanced version of the gcp-cli orb's authorize command.
+parameters:
+  do-docker-login:
+    type: enum
+    default: ""
+    enum: ["", "true"]
+    description: "Have Docker use the retrieved creds to log into Google Artifact Registry, where we have a Docker registry. Likely will need to run setup_remote_docker command first. "
+  do-helm-login:
+    type: enum
+    default: ""
+    enum: ["", "true"]
+    description: "Have Helm use the retrieved creds to log into Google Artifact Registry, using Helm's support for OCI registries."
+  do-activate-application-default-creds:
+    type: enum
+    default: "true"
+    enum: ["","true"]
+    description: "Configure the environment to use the retrieved credentials as the Application Default Creds (ADC). This option does not work if delete-cred-file is true"
+  delete-cred-file:
+    type: enum
+    default: "false"
+    enum: ["false", "true"]
+    description: delete the credentials file
+  project-id:
+    type: env_var_name
+    default: GCP_PROJECT_ID
+    description: The name of the environment variable containing the GCP project ID to be authenticated to. For example, the named variable could contain "myproject-123456"
+  workload-identity-pool-id:
+    type: env_var_name
+    default: GCP_WIP_ID
+    description: The name of the environment variable containing the workload identity pool to use to authenticate to GCP
+  workload-identity-pool-provider-id:
+    type: env_var_name
+    default: GCP_WIP_PROVIDER_ID
+    description: The name of the environment variable containing the workload identity pool provider to use to authenticate to GCP
+  service-account-email:
+    type: env_var_name
+    default: GCP_SERVICE_ACCOUNT_EMAIL
+    description: The name of the environment variable containing the service account email to use to authenticate to GCP
+  gcp-cred-config-file-path:
+    type: string
+    default: /tmp/circleci-gcp_cred_config.json
+    description: The full path to the file used to store GCP OIDC Authentication configuration. This is an internal value and should only be changed if the default file conflicts with your needs
+  oidc-token-file-path:
+    type: string
+    default: /tmp/circleci-oidc_token.json
+    description: The full path to the file used to store the CCI-provided OIDC token. This is an internal value and should only be changed if the default file conflicts with your needs
+steps:
+  - run:
+      name: Set up GCP authentication details
+      command: |
+        # Store OIDC Token in temp file
+        echo $CIRCLE_OIDC_TOKEN > << parameters.oidc-token-file-path >>
+        # Create a credential config for the generated OIDC ID Token
+        gcloud iam workload-identity-pools create-cred-config \
+          "projects/${<< parameters.project-id >>}/locations/global/workloadIdentityPools/${<< parameters.workload-identity-pool-id >>}/providers/${<< parameters.workload-identity-pool-provider-id >>}" \
+          --output-file="<< parameters.gcp-cred-config-file-path >>" \
+          --service-account="${<< parameters.service-account-email >>}" \
+          --credential-source-file=<< parameters.oidc-token-file-path >>
+  - run:
+      name: GCloud auth
+      command:  gcloud auth login --cred-file "<< parameters.gcp-cred-config-file-path >>"
+  - run:
+      name: Container related registry logins
+      command: |
+        if [ -n "<< parameters.do-docker-login >>" ]; then
+          gcloud auth configure-docker --quiet us-central1-docker.pkg.dev,gcr.io
+        fi
+
+        if [ -n "<< parameters.do-helm-login >>" ]; then
+        export GOOGLE_APPLICATION_CREDENTIALS="<< parameters.gcp-cred-config-file-path >>"
+        gcloud auth application-default print-access-token | helm registry login -u oauth2accesstoken --password-stdin https://us-central1-docker.pkg.dev
+        fi
+  - run:
+      name: Set up Application Default Credentials (ADC)
+      command: |
+        if [ -n "<< parameters.do-activate-application-default-creds >>" ]; then
+          export GOOGLE_APPLICATION_CREDENTIALS="<< parameters.gcp-cred-config-file-path >>"
+          echo "export GOOGLE_APPLICATION_CREDENTIALS='<< parameters.gcp-cred-config-file-path >>'" >> "$BASH_ENV"
+        fi
+  - run:
+      name: Delete cred files
+      command: |
+        if [ "<< parameters.delete-cred-file >>" == "true" ]; then
+          rm << parameters.oidc-token-file-path >>
+          rm << parameters.gcp-cred-config-file-path >>
+        fi
