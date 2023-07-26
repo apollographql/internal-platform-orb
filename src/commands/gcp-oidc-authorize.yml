@@ -12,7 +12,7 @@ parameters:
     description: "Have Helm use the retrieved creds to log into Google Artifact Registry, using Helm's support for OCI registries."
   do-activate-application-default-creds:
     type: enum
-    default: ""
+    default: "true"
     enum: ["","true"]
     description: "Configure the environment to use the retrieved credentials as the Application Default Creds (ADC). This option does not work if delete-cred-file is true"
   delete-cred-file:
