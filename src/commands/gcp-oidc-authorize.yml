@@ -1,4 +1,4 @@
-description: Authorize GCP using an OIDC integration rather than receiving a service account's credentials via environment variable. You must have installed the gcloud command line tool yourself, previously. This is a enhanced version of the gcp-cli orb's authorize command
+description: Authorize the GCP CLI using OIDC rather than receiving a service account's credentials via environment variable. This command creates an ephemeral GCP session by leveraging GCP Workload Identity. Workload Identity must be configured in the project you are attempting to authenticate to prior to using this command. Additionally, you will need to have installed the gcloud command line utility in your CI execution environment prior to using this command. This is a enhanced version of the gcp-cli orb's authorize command.
 parameters:
   do-docker-login:
     type: enum
@@ -23,7 +23,7 @@ parameters:
   project-id:
     type: env_var_name
     default: GCP_PROJECT_ID
-    description: The name of the environment variable containing the GCP project ID to be authenticated to. For example, the named variable could contain "secops-354017"
+    description: The name of the environment variable containing the GCP project ID to be authenticated to. For example, the named variable could contain "myproject-123456"
   workload-identity-pool-id:
     type: env_var_name
     default: GCP_WIP_ID
