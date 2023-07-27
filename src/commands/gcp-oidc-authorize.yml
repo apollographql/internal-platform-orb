@@ -4,12 +4,20 @@ parameters:
     type: enum
     default: ""
     enum: ["", "true"]
-    description: "Have Docker use the retrieved creds to log into Google Artifact Registry, where we have a Docker registry. Likely will need to run setup_remote_docker command first. "
+    description: "Have Docker use the retrieved creds to log into Google Artifact Registry, where we have a Docker registry. Likely will need to run setup_remote_docker command first."
+  docker-registry-url:
+    type: string
+    default: "us-central1-docker.pkg.dev,gcr.io"
+    description: A comma-separated list of Docker registries to which  this command should authenticate. This command configures authentication credentials via the GCloud CLI, so these will need to be hosted in GCP Artifact Registry. Only used if do-docker-login is true.
   do-helm-login:
     type: enum
     default: ""
     enum: ["", "true"]
     description: "Have Helm use the retrieved creds to log into Google Artifact Registry, using Helm's support for OCI registries."
+  helm-registry-url:
+    type: string
+    default: "https://us-central1-docker.pkg.dev"
+    description: The URL of the Helm Registry to which this command should authenticate. This command configures authentication credentials via the GCloud CLI, so this Helm Registry will need to be hosted in GCP Artifact Registry. Only used if do-helm-login is true.
   do-activate-application-default-creds:
     type: enum
     default: "true"
@@ -63,12 +71,12 @@ steps:
       name: Container related registry logins
       command: |
         if [ -n "<< parameters.do-docker-login >>" ]; then
-          gcloud auth configure-docker --quiet us-central1-docker.pkg.dev,gcr.io
+          gcloud auth configure-docker --quiet << parameters.docker-registry-url >>
         fi
 
         if [ -n "<< parameters.do-helm-login >>" ]; then
         export GOOGLE_APPLICATION_CREDENTIALS="<< parameters.gcp-cred-config-file-path >>"
-        gcloud auth application-default print-access-token | helm registry login -u oauth2accesstoken --password-stdin https://us-central1-docker.pkg.dev
+        gcloud auth application-default print-access-token | helm registry login -u oauth2accesstoken --password-stdin << parameters.helm-registry-url >>
         fi
   - run:
       name: Set up Application Default Credentials (ADC)
