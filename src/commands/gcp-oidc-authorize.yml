@@ -68,7 +68,7 @@ steps:
       name: GCloud auth
       command:  gcloud auth login --cred-file "<< parameters.gcp-cred-config-file-path >>"
   - run:
-      name: Container related registry logins
+      name: Registry logins
       command: |
         if [ -n "<< parameters.do-docker-login >>" ]; then
           gcloud auth configure-docker --quiet << parameters.docker-registry-url >>
