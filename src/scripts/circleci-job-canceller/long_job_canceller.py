@@ -2,7 +2,10 @@
 
 from Modules.circle_utils import *
 import datetime
+import functools
 import itertools
+import math
+import multiprocessing
 import os.path
 import pprint
 import requests
@@ -32,7 +35,7 @@ def get_workflow_started_by(current_workflow, headers):
         return user_info.get("login")
     except requests.exceptions.HTTPError as e:
         print(
-            f'Exception encountered fetching user: {current_workflow["started_by"]} for current_workflow: {current_workflow["id"]}: {e}'
+            f'get_workflow_started_by(...): Exception encountered fetching user: {current_workflow["started_by"]} for current_workflow: {current_workflow["id"]}: {e}'
         )
         # 4XX
         # the Github / CircleCI scheduling bot won't have a username (JSON body will be {'message': 'Not found.'})
@@ -60,48 +63,84 @@ def pipeline_created_at_to_datetime(pipeline):
     return datetime.datetime.fromisoformat(pipeline['created_at'][:-1]).replace(tzinfo=datetime.timezone.utc)
 
 
+def pipeline_to_old_workflow_ids_iter(window_end_cancel, headers, pipeline):
+    created_at = pipeline_created_at_to_datetime(pipeline)
+
+    for current_workflow in get_all_items(f"/pipeline/{pipeline['id']}/workflow", headers, None):
+        job_status = None
+        username = get_workflow_started_by(current_workflow, headers)
+        logging_detail = f'[{created_at}] ({current_workflow["name"]})[{current_workflow["status"]}], started by gh:{username}. See more info at: https://app.circleci.com/pipelines/workflows/{current_workflow["id"]}'
+
+        if not current_workflow.get('stopped_at'):
+            if (created_at < window_end_cancel):
+                print(f'pipeline_to_old_workflow_ids_iter(...): found too old workflow {logging_detail}')
+                job_status = "too_old"
+
+            elif username in robot_committers:
+                continue
+
+            elif current_workflow['status'] == 'on_hold':
+                print(f'pipeline_to_old_workflow_ids_iter(...): midlife warning for workflow {logging_detail}')
+                job_status = "age_warning"
+
+        if job_status:
+            yield {
+                "job_status": job_status,
+                "name": current_workflow['name'],
+                "id": current_workflow['id'],
+                "username": username
+            }
+
+
+def pipeline_to_old_workflow_ids(window_end_cancel, headers, pipeline):
+    return list(pipeline_to_old_workflow_ids_iter(window_end_cancel, headers, pipeline))
+
+
+def get_all_pipelines_in_window(headers, repo_slug, window_start, window_end):
+    pipelines_walked = -1
+
+    for current_pipeline in get_all_items(f"/project/gh/{repo_slug}/pipeline", headers, None):
+        # Paginate through only those pipelines which started inside our given window
+        created_at = pipeline_created_at_to_datetime(current_pipeline)
+
+        pipelines_walked += 1
+        if pipelines_walked % 100 == 0:
+            print(f"get_all_pipelines_in_window(...): at {created_at} / {window_start}")
+
+        if window_end < created_at:
+            print(f'get_all_pipelines_in_window(...): Before window end, pipeline too young: {created_at}')
+            continue
+        if created_at < window_start:
+            print(f'get_all_pipelines_in_window(...): Reached start of window, pipeline too old: {created_at}')
+            return None
+
+        yield current_pipeline
+
+
+def imap_with_progress(pool, f, tasks, chunk):
+    l = len(tasks)
+    for i, r in enumerate(pool.imap(f, tasks, chunk)):
+        if i % 100 == 0:
+            print(f"imap_with_progress(...): {i} / {l}")
+
+        yield r
+
+
 def find_old_workflow_ids(
         repo_slug,
         window_start,
         window_end_cancel,
         window_end_warn,
         headers):
-    print(
-        f'Window to paginate through: [start:{window_start}, cancel:{window_end_cancel}, warn:{window_end_warn}]')
-    for current_pipeline in get_all_items(f"/project/gh/{repo_slug}/pipeline", headers, None):
-        # Paginate through only those pipelines which started inside our given window
-        created_at = pipeline_created_at_to_datetime(current_pipeline)
-        if window_end_warn < created_at:
-            print(f'Pipeline too young: {created_at}')
-            continue
-        if created_at < window_start:
-            print(f'Pipeline too old: {created_at}')
-            return None
+    print("find_old_workflow_ids({repo_slug}, start={window_start}, cancel_before={window_end_cancel}, warn_before={window_end_warn}): finding all pipelines first...")
+    pipelines = list(get_all_pipelines_in_window(headers, repo_slug, window_start, window_end_warn))
 
-        for current_workflow in get_all_items(f"/pipeline/{current_pipeline['id']}/workflow", headers, None):
-            job_status = None
-            username = get_workflow_started_by(current_workflow, headers)
-            logging_detail = f'[{created_at}] ({current_workflow["name"]})[{current_workflow["status"]}], started by gh:{username}. See more info at: https://app.circleci.com/pipelines/workflows/{current_workflow["id"]}'
+    print("find_old_workflow_ids({repo_slug}, start={window_start}, cancel_before={window_end_cancel}, warn_before={window_end_warn}): parallel fetch of all old_workflow_ids...")
+    with multiprocessing.Pool() as pool:
+        to_chain = list(imap_with_progress(pool, functools.partial(pipeline_to_old_workflow_ids, window_end_cancel, headers), pipelines, 10))
 
-            if not current_workflow.get('stopped_at'):
-                if (created_at < window_end_cancel):
-                    print(f'found too old workflow {logging_detail}')
-                    job_status = "too_old"
-
-                elif username in robot_committers:
-                    continue
-
-                elif current_workflow['status'] == 'on_hold':
-                    print(f'midlife warning for workflow {logging_detail}')
-                    job_status = "age_warning"
-
-            if job_status:
-                yield {
-                    "job_status": job_status,
-                    "name": current_workflow['name'],
-                    "id": current_workflow['id'],
-                    "username": username
-                }
+        print(f'find_old_workflow_ids({repo_slug}, start={window_start}, cancel_before={window_end_cancel}, warn_before={window_end_warn}): done.')
+        return itertools.chain.from_iterable(to_chain)
 
 
 def matches_any_in_list(str, list):
@@ -128,21 +167,27 @@ def main(circleapitoken, orgreposlug, n_windows, output_file, commit, ignore):
 
     with open(simple_path, 'w') as f:
         f.write("job_status\tproceed\tid\tusername\tname\n")
-        for current_info in find_old_workflow_ids(
+
+        old_workflow_ids = list(find_old_workflow_ids(
             orgreposlug,
             now - (job_life_clock * n_windows),
             now - job_life_clock,
             now - job_midlife_warning,
             standard_headers
-        ):
+        ))
+
+        print(f"main: len(old_workflow_ids(...)) = {len(old_workflow_ids)}")
+
+        for current_info in old_workflow_ids:
             if current_info["job_status"] == "age_warning":
                 if not (ignore == ['']):
                     if has_only_ignored_jobs(current_info, ignore, standard_headers):
                         print(
-                            f"ignoring workflow: {current_info['id']} See more info at https://app.circleci.com/pipelines/workflows/{current_info['id']}")
+                            f"main: ignoring workflow: {current_info['id']} See more info at https://app.circleci.com/pipelines/workflows/{current_info['id']}")
                         continue
             else:
                 if commit:
+                    print(f"main: Cancelling workflow {current_info['id']}")
                     http_post(
                         f"https://circleci.com/api/v2/workflow/{current_info['id']}/cancel", headers=standard_headers)
 
