@@ -8,6 +8,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.3.2] - 2023-10-16
 
 - Added `circleci-long-job-cancel` as a way to spin off `circleci-continue-long-job-cancel` for workflows looking to avoid using `continue` based workflows.
+- Fixed `long_job_canceller` script to log moderately more. This fixes issues in CircleCI when it doesn't see output for too long due to no output detected.
 
 ## [1.3.1] - 2023-08-04
 
