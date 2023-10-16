@@ -20,12 +20,11 @@ parameters:
     default: 6
     type: integer
 steps:
-  - run:
-      name: Cancel long jobs
-      working_directory: /tmp/apollo_internal_platform_orb/src/scripts/circleci-job-canceller
-      command: |
-        python3 -m pip install -r requirements.txt
-        python3 long_job_canceller.py $<< parameters.circleci-token-variable >> << parameters.org-repo-slug >> --commit --n-windows << parameters.n-windows >> --ignore-job-names=<< parameters.ignore-when-all-on-hold-job-names-contain >>
+  - circleci-long-job-cancel:
+        org-repo-slug: << parameters.org-repo-slug >>
+        circle-ci-token-variable: << parameters.circleci-token-variable >>
+        ignore-when-all-on-hold-job-names-contain: << parameters.ignore-when-all-on-hold-job-names-contain >>
+        n-windows: << parameters.n-windows >>
   - run:
       name: Spawn workflow jobs for warnings
       working_directory: /tmp/apollo_internal_platform_orb/src/scripts/render-yaml-from-tsv

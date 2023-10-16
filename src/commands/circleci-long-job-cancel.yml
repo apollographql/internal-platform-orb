@@ -1,0 +1,27 @@
+description: for any job that is old, cancel it and warn the people. Must run the setup command on each new executor
+
+parameters:
+  org-repo-slug:
+    type: string
+    description: "github-username-or-org-name/repo-name"
+  circleci-token-variable:
+    description: the name of the environmental variable that contains the circleci token
+    default: "CIRCLECI_TOKEN"
+    type: string
+  ignore-when-all-on-hold-job-names-contain:
+    description: Do not warn about workflows where all of the on hold job names contain this string (also supported - comma seperated list)
+    type: string
+    default: ""
+  n-windows:
+    description: Number of windows to look back across. Default window length is 2 hours.
+    default: 6
+    type: integer
+steps:
+  - run:
+      name: Cancel long jobs
+      working_directory: /tmp/apollo_internal_platform_orb/src/scripts/circleci-job-canceller
+      command: |
+        python3 -m pip install -r requirements.txt
+        python3 long_job_canceller.py $<< parameters.circleci-token-variable >> << parameters.org-repo-slug >> --commit --n-windows << parameters.n-windows >> --ignore-job-names=<< parameters.ignore-when-all-on-hold-job-names-contain >>
+  - store_artifacts:
+        path: /tmp/circle/
