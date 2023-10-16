@@ -213,6 +213,6 @@ if __name__ == "__main__":
     main(args.circleapitoken, args.orgreposlug,
          args.n_windows,
          args.window_start_in_hours,
-         args.window_cancel_end_in_hours,
-         args.window_warning_end_in_hours,
+         args.window_end_cancel_in_hours,
+         args.window_end_warning_in_hours,
          args.output_file, args.commit, args.ignore_job_names.split(","))
