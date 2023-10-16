@@ -22,7 +22,7 @@ parameters:
 steps:
   - circleci-long-job-cancel:
         org-repo-slug: << parameters.org-repo-slug >>
-        circle-ci-token-variable: << parameters.circleci-token-variable >>
+        circleci-token-variable: << parameters.circleci-token-variable >>
         ignore-when-all-on-hold-job-names-contain: << parameters.ignore-when-all-on-hold-job-names-contain >>
         n-windows: << parameters.n-windows >>
   - run:
