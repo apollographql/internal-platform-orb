@@ -32,7 +32,7 @@ def get_workflow_started_by(current_workflow, headers):
         return user_info.get("login")
     except requests.exceptions.HTTPError as e:
         print(
-            f'Exception encountered fetching user: {current_workflow["started_by"]} for current_workflow: {current_workflow["id"]}: {e}'
+            f'get_workflow_started_by(...): Exception encountered fetching user: {current_workflow["started_by"]} for current_workflow: {current_workflow["id"]}: {e}'
         )
         # 4XX
         # the Github / CircleCI scheduling bot won't have a username (JSON body will be {'message': 'Not found.'})
@@ -66,16 +66,23 @@ def find_old_workflow_ids(
         window_end_cancel,
         window_end_warn,
         headers):
-    print(
-        f'Window to paginate through: [start:{window_start}, cancel:{window_end_cancel}, warn:{window_end_warn}]')
+    print("find_old_workflow_ids({repo_slug}, start={window_start}, cancel_before={window_end_cancel}, warn_before={window_end_warn})")
+
+    pipelines_walked = -1
+
     for current_pipeline in get_all_items(f"/project/gh/{repo_slug}/pipeline", headers, None):
         # Paginate through only those pipelines which started inside our given window
         created_at = pipeline_created_at_to_datetime(current_pipeline)
+
+        pipelines_walked += 1
+        if pipelines_walked % 100 == 0:
+            print(f"find_old_workflow_ids(...): at {created_at} / {window_start}")
+
         if window_end_warn < created_at:
-            print(f'Pipeline too young: {created_at}')
+            print(f'find_old_workflow_ids(...): Before window end, pipeline too young: {created_at}')
             continue
         if created_at < window_start:
-            print(f'Pipeline too old: {created_at}')
+            print(f'find_old_workflow_ids(...): Reached start of window, pipeline too old: {created_at}')
             return None
 
         for current_workflow in get_all_items(f"/pipeline/{current_pipeline['id']}/workflow", headers, None):
@@ -85,14 +92,14 @@ def find_old_workflow_ids(
 
             if not current_workflow.get('stopped_at'):
                 if (created_at < window_end_cancel):
-                    print(f'found too old workflow {logging_detail}')
+                    print(f'find_old_workflow_ids(...): found too old workflow {logging_detail}')
                     job_status = "too_old"
 
                 elif username in robot_committers:
                     continue
 
                 elif current_workflow['status'] == 'on_hold':
-                    print(f'midlife warning for workflow {logging_detail}')
+                    print(f'find_old_workflow_ids(...): midlife warning for workflow {logging_detail}')
                     job_status = "age_warning"
 
             if job_status:
@@ -158,7 +165,7 @@ def main(
                 if not (ignore == ['']):
                     if has_only_ignored_jobs(current_info, ignore, standard_headers):
                         print(
-                            f"ignoring workflow: {current_info['id']} See more info at https://app.circleci.com/pipelines/workflows/{current_info['id']}")
+                            f"main(...): ignoring workflow: {current_info['id']} See more info at https://app.circleci.com/pipelines/workflows/{current_info['id']}")
                         continue
             else:
                 if commit:
