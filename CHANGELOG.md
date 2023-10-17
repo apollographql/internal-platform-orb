@@ -13,6 +13,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - What is done with the output _afterwards_ is up to the user of the command
   - Moved output from `/tmp/notifications.tsv` to `/tmp/circle-long-running-workflows.tsv`
     - Format for output is now: `orgreposlug\tid\tusername\tname`
+  - Example of new usage can be:
+    - Warnings:
+      - Run the command with `window-start-in-hours` as 2, and `window-end-in-hours` as 1
+      - Using `slack-notify-compact`, you can then pipe the notifications to your team that you will be cancelling their workflows in a few hours
+    - Cancels:
+      - Run the command with `window-start-in-hours` as 4, and `window-end-in-hours` as 2, and `commit` as true
 
 ## [1.3.3] - 2023-10-16
 
