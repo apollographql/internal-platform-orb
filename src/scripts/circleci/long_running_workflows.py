@@ -60,7 +60,7 @@ def find_old_workflow_ids(
         window_start,
         window_end,
         headers):
-    print("find_old_workflow_ids({repo_slug}, window_start={window_start}, window_end={window_end})")
+    print(f"find_old_workflow_ids({repo_slug}, window_start={window_start}, window_end={window_end})")
 
     pipelines_walked = -1
 
