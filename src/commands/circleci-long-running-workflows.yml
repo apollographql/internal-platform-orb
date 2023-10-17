@@ -1,4 +1,4 @@
-description: for any job that is old, cancel it and warn the people. Must run the setup command on each new executor. Outputs a TSV at /tmp/notifications.tsv
+description: for any job that is old, cancel it and warn the people. Must run the setup command on each new executor. Outputs a TSV at /tmp/long-running-workflows.tsv
 
 parameters:
   org-repo-slug:
@@ -38,4 +38,4 @@ steps:
           --window-end-cancel-in-hours << parameters.window-end-cancel-in-hours >> \
           --window-end-warning-in-hours << parameters.window-end-warning-in-hours >>
   - store_artifacts:
-        path: /tmp/circle/
+      path: /tmp/circleci-long-running-workflows.tsv

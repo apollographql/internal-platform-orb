@@ -157,7 +157,7 @@ if __name__ == "__main__":
 
     parser.add_argument("--output-file",
                         help="output to file path",
-                        default="/tmp/notifications.tsv")
+                        default="/tmp/circleci-long-running-workflows.tsv")
     parser.add_argument("--commit",
                         help="just cancel jobs",
                         default=False,

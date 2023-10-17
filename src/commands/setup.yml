@@ -8,6 +8,7 @@ parameters:
 
 steps:
   - run:
+      name: Setup the Apollo Internal Orb...
       when: always
       command: |
         if [ ! -e  /tmp/apollo_internal_platform_orb ];
