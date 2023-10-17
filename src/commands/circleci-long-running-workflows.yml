@@ -35,7 +35,6 @@ steps:
           --n-windows << parameters.n-windows >> \
           --ignore-job-names=<< parameters.ignore-when-all-on-hold-job-names-contain >> \
           --window-start-in-hours << parameters.window-start-in-hours >> \
-          --window-end-cancel-in-hours << parameters.window-end-cancel-in-hours >> \
-          --window-end-warning-in-hours << parameters.window-end-warning-in-hours >>
+          --window-end-in-hours << parameters.window-end-in-hours >>
   - store_artifacts:
       path: /tmp/circleci-long-running-workflows.tsv
