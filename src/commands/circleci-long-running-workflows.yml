@@ -12,7 +12,7 @@ parameters:
     description: Do not warn about workflows where all of the on hold job names contain this string (also supported - comma seperated list)
     type: string
     default: ""
-  commit:
+  cancel:
     description: Whether or not to cancel old Workflows which are found.
     default: false
     type: boolean
@@ -26,12 +26,12 @@ parameters:
     type: integer
 steps:
   - run:
-      name: Find long running Workflows (Cancel them? << parameters.commit >>)
+      name: Find long running Workflows (Cancel them? << parameters.cancel >>)
       working_directory: /tmp/apollo_internal_platform_orb/src/scripts/circleci-job-canceller
       command: |
         python3 -m pip install -r requirements.txt
         python3 long_workflow_canceller.py $<< parameters.circleci-token-variable >> << parameters.org-repo-slug >> \
-          <<#parameters.commit>> --commit <</parameters.commit>> \
+          <<#parameters.cancel>> --cancel <</parameters.cancel>> \
           --ignore-job-names=<< parameters.ignore-when-all-on-hold-job-names-contain >> \
           --window-start-in-hours << parameters.window-start-in-hours >> \
           --window-end-in-hours << parameters.window-end-in-hours >>

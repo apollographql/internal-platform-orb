@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Deprecated `circleci-continue-long-job-cancel`
 - Refactored `circleci-long-job-cancel` to `circleci-long-running-workflows`
   - Now takes a simple `window-start` and `window-end` set of arguments
+  - No longer auto-cancels anything. Instead, provides the flag `cancel`
   - What is done with the output _afterwards_ is up to the user of the command
   - Moved output from `/tmp/notifications.tsv` to `/tmp/circle-long-running-workflows.tsv`
     - Format for output is now: `orgreposlug\tid\tusername\tname`
@@ -18,7 +19,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
       - Run the command with `window-start-in-hours` as 2, and `window-end-in-hours` as 1
       - Using `slack-notify-compact`, you can then pipe the notifications to your team that you will be cancelling their workflows in a few hours
     - Cancels:
-      - Run the command with `window-start-in-hours` as 4, and `window-end-in-hours` as 2, and `commit` as true
+      - Run the command with `window-start-in-hours` as 4, and `window-end-in-hours` as 2, and `cancel` as true
 
 ## [1.3.3] - 2023-10-16
 

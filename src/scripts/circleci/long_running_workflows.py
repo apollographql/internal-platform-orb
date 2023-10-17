@@ -113,7 +113,7 @@ def main(
     circleapitoken, orgreposlug,
     window_start_in_hours,
     window_end_in_hours,
-    output_file, commit, ignore
+    output_file, cancel, ignore
 ):
     standard_headers = {"Circle-Token": circleapitoken}
 
@@ -131,7 +131,7 @@ def main(
             window_end,
             standard_headers
         ):
-            if commit:
+            if cancel:
                 print(f'main(...): cancelling {current_info["id"]}')
                 http_post(
                     f"https://circleci.com/api/v2/workflow/{current_info['id']}/cancel", headers=standard_headers)
@@ -158,7 +158,7 @@ if __name__ == "__main__":
     parser.add_argument("--output-file",
                         help="output to file path",
                         default="/tmp/circleci-long-running-workflows.tsv")
-    parser.add_argument("--commit",
+    parser.add_argument("--cancel",
                         help="just cancel jobs",
                         default=False,
                         action="store_true")
@@ -174,9 +174,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    print(args.commit)
-
     main(args.circleapitoken, args.orgreposlug,
          args.window_start_in_hours,
          args.window_end_in_hours,
-         args.output_file, args.commit, args.ignore_job_names.split(","))
+         args.output_file, args.cancel, args.ignore_job_names.split(","))
