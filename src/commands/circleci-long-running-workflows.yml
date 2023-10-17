@@ -31,7 +31,7 @@ steps:
       command: |
         python3 -m pip install -r requirements.txt
         python3 long_workflow_canceller.py $<< parameters.circleci-token-variable >> << parameters.org-repo-slug >> \
-          << #parameters.commit >>--commit \<< /parameters.commit >>
+          << #parameters.commit >>--commit \ << /parameters.commit >>
           --n-windows << parameters.n-windows >> \
           --ignore-job-names=<< parameters.ignore-when-all-on-hold-job-names-contain >> \
           --window-start-in-hours << parameters.window-start-in-hours >> \

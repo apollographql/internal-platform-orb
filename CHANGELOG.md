@@ -5,6 +5,15 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.0] - 2023-10-17
+
+- Deprecated `circleci-continue-long-job-cancel`
+- Refactored `circleci-long-job-cancel` to `circleci-long-running-workflows`
+  - Now takes a simple `window-start` and `window-end` set of arguments
+  - What is done with the output _afterwards_ is up to the user of the command
+  - Moved output from `/tmp/notifications.tsv` to `/tmp/circle-long-running-workflows.tsv`
+    - Format for output is now: `orgreposlug\tid\tusername\tname`
+
 ## [1.3.3] - 2023-10-16
 
 - Fixed `long_job_canceller` script to log moderately more. This fixes issues in CircleCI when it doesn't see output for too long due to no output detected.
