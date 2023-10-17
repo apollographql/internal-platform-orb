@@ -27,10 +27,10 @@ parameters:
 steps:
   - run:
       name: Find long running Workflows (Cancel them? << parameters.cancel >>)
-      working_directory: /tmp/apollo_internal_platform_orb/src/scripts/circleci-job-canceller
+      working_directory: /tmp/apollo_internal_platform_orb/src/scripts/circleci
       command: |
         python3 -m pip install -r requirements.txt
-        python3 long_workflow_canceller.py $<< parameters.circleci-token-variable >> << parameters.org-repo-slug >> \
+        python3 long_running_workflows.py $<< parameters.circleci-token-variable >> << parameters.org-repo-slug >> \
           <<#parameters.cancel>> --cancel <</parameters.cancel>> \
           --ignore-job-names=<< parameters.ignore-when-all-on-hold-job-names-contain >> \
           --window-start-in-hours << parameters.window-start-in-hours >> \
