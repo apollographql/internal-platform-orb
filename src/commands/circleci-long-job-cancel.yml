@@ -1,4 +1,4 @@
-description: for any job that is old, cancel it and warn the people. Must run the setup command on each new executor
+description: for any job that is old, cancel it and warn the people. Must run the setup command on each new executor. Outputs a TSV at /tmp/notifications.tsv
 
 parameters:
   org-repo-slug:
@@ -12,30 +12,26 @@ parameters:
     description: Do not warn about workflows where all of the on hold job names contain this string (also supported - comma seperated list)
     type: string
     default: ""
-  n-windows:
-    description: Number of windows to look back across. Default window length is 2 hours.
-    default: 6
-    type: integer
+  commit:
+    description: Whether or not to cancel old Workflows which are found.
+    default: false
+    type: boolean
   window-start-in-hours:
     description: Number of hours ago to start search window. Default usage is the n-windows argument.
     default: 0
     type: integer
-  window-end-cancel-in-hours:
+  window-end-in-hours:
     description: Number of hours ago to end search window for cancels. ie, if the Workflows found in the search window, are last updated _before_ this watermark, cancel them. Default usage is the n-windows argument.
-    default: 0
-    type: integer
-  window-end-warning-in-hours:
-    description: Number of hours ago to end search window for warnings. Assumes this is less than window-end-cancel-in-hours when present. Default usage is the n-windows argument.
     default: 0
     type: integer
 steps:
   - run:
-      name: Cancel long jobs
+      name: Find long running Workflows (Cancel them? << parameters.commit >>)
       working_directory: /tmp/apollo_internal_platform_orb/src/scripts/circleci-job-canceller
       command: |
         python3 -m pip install -r requirements.txt
-        python3 long_job_canceller.py $<< parameters.circleci-token-variable >> << parameters.org-repo-slug >> \
-          --commit \
+        python3 long_workflow_canceller.py $<< parameters.circleci-token-variable >> << parameters.org-repo-slug >> \
+          << #parameters.commit >>--commit \<< /parameters.commit >>
           --n-windows << parameters.n-windows >> \
           --ignore-job-names=<< parameters.ignore-when-all-on-hold-job-names-contain >> \
           --window-start-in-hours << parameters.window-start-in-hours >> \
