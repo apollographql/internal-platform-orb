@@ -36,10 +36,10 @@ steps:
         python3 -m pip install -r requirements.txt
 
         python3 long_running_workflows.py $<< parameters.circleci-token-variable >> << parameters.org-repo-slug >> \
-          --output << parameters.output >>
-          <<#parameters.cancel>> --cancel <</parameters.cancel>> \
+          --output << parameters.output >> \
           --ignore-job-names=<< parameters.ignore-when-all-on-hold-job-names-contain >> \
           --window-start-in-hours << parameters.window-start-in-hours >> \
-          --window-end-in-hours << parameters.window-end-in-hours >>
+          --window-end-in-hours << parameters.window-end-in-hours >> \
+          <<#parameters.cancel>> --cancel <</parameters.cancel>>
   - store_artifacts:
       path: << parameters.output >>
