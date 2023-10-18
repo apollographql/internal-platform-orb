@@ -1,0 +1,45 @@
+description: for any job that is old, cancel it and warn the people. Must run the setup command on each new executor.
+
+parameters:
+  org-repo-slug:
+    type: string
+    description: "github-username-or-org-name/repo-name"
+  circleci-token-variable:
+    description: the name of the environmental variable that contains the circleci token
+    default: "CIRCLECI_TOKEN"
+    type: string
+  ignore-when-all-on-hold-job-names-contain:
+    description: Do not warn about workflows where all of the on hold job names contain this string (also supported - comma seperated list)
+    type: string
+    default: ""
+  cancel:
+    description: Whether or not to cancel old Workflows which are found.
+    default: false
+    type: boolean
+  window-start-in-hours:
+    description: Number of hours ago to start search window based on Worflow's `created_at` date.
+    default: 0
+    type: integer
+  window-end-in-hours:
+    description: Number of hours ago to end search window based on Worflow's `created_at` date.
+    default: 0
+    type: integer
+  output:
+    description: Location at which to place tsv value file.
+    default: /tmp/circleci-long-running-workflows.tsv
+    type: string
+steps:
+  - run:
+      name: Find long running Workflows (Cancel them? << parameters.cancel >>)
+      working_directory: /tmp/apollo_internal_platform_orb/src/scripts/circleci
+      command: |
+        python3 -m pip install -r requirements.txt
+
+        python3 long_running_workflows.py $<< parameters.circleci-token-variable >> << parameters.org-repo-slug >> \
+          --output << parameters.output >>
+          <<#parameters.cancel>> --cancel <</parameters.cancel>> \
+          --ignore-job-names=<< parameters.ignore-when-all-on-hold-job-names-contain >> \
+          --window-start-in-hours << parameters.window-start-in-hours >> \
+          --window-end-in-hours << parameters.window-end-in-hours >>
+  - store_artifacts:
+      path: << parameters.output >>
