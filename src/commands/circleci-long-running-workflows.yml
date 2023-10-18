@@ -17,11 +17,11 @@ parameters:
     default: false
     type: boolean
   window-start-in-hours:
-    description: Number of hours ago to start search window. Default usage is the n-windows argument.
+    description: Number of hours ago to start search window based on Worflow's `created_at` date.
     default: 0
     type: integer
   window-end-in-hours:
-    description: Number of hours ago to end search window for cancels. ie, if the Workflows found in the search window, are last updated _before_ this watermark, cancel them. Default usage is the n-windows argument.
+    description: Number of hours ago to end search window based on Worflow's `created_at` date.
     default: 0
     type: integer
   output:
