@@ -33,9 +33,6 @@ steps:
       name: Find long running Workflows (Cancel them? << parameters.cancel >>)
       working_directory: /tmp/apollo_internal_platform_orb/src/scripts/circleci
       command: |
-        pwd
-        ls
-
         python3 -m pip install -r requirements.txt
 
         python3 long_running_workflows.py $<< parameters.circleci-token-variable >> << parameters.org-repo-slug >> \
