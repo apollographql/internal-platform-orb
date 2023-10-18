@@ -156,8 +156,8 @@ if __name__ == "__main__":
                         help="the location, user-or-org/repository-name , of this repository")
 
     parser.add_argument("--output-file",
-                        help="output to file path",
-                        default="/tmp/circleci-long-running-workflows.tsv")
+                        help="output tsv to file path",
+                        type=str)
     parser.add_argument("--cancel",
                         help="just cancel jobs",
                         default=False,

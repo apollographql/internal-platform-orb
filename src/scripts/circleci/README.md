@@ -2,9 +2,7 @@
 
 ## `long_running_workflows.py`
 
-Finds any Circle Workflow that's too old. If commit is set to true, goes ahead and cancels them via the API.
-
-Outputs findings into /tmp/circleci-long-running-workflows.tsv
+Finds any Circle Workflow that's too old. If `cancel` is set to true, goes ahead and cancels them via the API.
 
 ## `main_is_borked.py`
 

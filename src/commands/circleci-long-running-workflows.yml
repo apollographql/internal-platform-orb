@@ -1,4 +1,4 @@
-description: for any job that is old, cancel it and warn the people. Must run the setup command on each new executor. Outputs a TSV at /tmp/long-running-workflows.tsv
+description: for any job that is old, cancel it and warn the people. Must run the setup command on each new executor.
 
 parameters:
   org-repo-slug:
@@ -24,16 +24,25 @@ parameters:
     description: Number of hours ago to end search window for cancels. ie, if the Workflows found in the search window, are last updated _before_ this watermark, cancel them. Default usage is the n-windows argument.
     default: 0
     type: integer
+  output:
+    description: Location at which to place tsv value file.
+    default: /tmp/circleci-long-running-workflows.tsv
+    type: string
 steps:
   - run:
       name: Find long running Workflows (Cancel them? << parameters.cancel >>)
       working_directory: /tmp/apollo_internal_platform_orb/src/scripts/circleci
       command: |
+        pwd
+        ls
+
         python3 -m pip install -r requirements.txt
+
         python3 long_running_workflows.py $<< parameters.circleci-token-variable >> << parameters.org-repo-slug >> \
+          --output << parameters.output >>
           <<#parameters.cancel>> --cancel <</parameters.cancel>> \
           --ignore-job-names=<< parameters.ignore-when-all-on-hold-job-names-contain >> \
           --window-start-in-hours << parameters.window-start-in-hours >> \
           --window-end-in-hours << parameters.window-end-in-hours >>
   - store_artifacts:
-      path: /tmp/circleci-long-running-workflows.tsv
+      path: << parameters.output >>
