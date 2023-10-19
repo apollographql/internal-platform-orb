@@ -5,9 +5,38 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.3.2] - 2023-10-19
+## [1.4.2] - 2023-10-19
 
 - Updated the version of an orb used in CI to build this orb. The CI process that builds this orb requires a version bump + changelog to update the repo, so issuing a new version to update the build process.
+
+## [1.4.1] - 2023-10-18
+
+- Fixed `circleci-long-running-workflows` the parametrized mustache templating didn't respect newlines. Bugs like "unrecognized command --cancel" etc.
+
+## [1.4.0] - 2023-10-18
+
+- Deprecated `circleci-continue-long-job-cancel`
+- Refactored `circleci-long-job-cancel` to `circleci-long-running-workflows`
+  - Now takes a simple `window-start` and `window-end` set of arguments
+  - No longer auto-cancels anything. Instead, provides the flag `cancel`
+  - What is done with the output _afterwards_ is up to the user of the command
+  - Moved output from `/tmp/notifications.tsv` to `/tmp/circle-long-running-workflows.tsv`
+    - Format for output is now: `orgreposlug\tid\tusername\tname`
+  - Example of new usage can be:
+    - Warnings:
+      - Run the command with `window-start-in-hours` as 2, and `window-end-in-hours` as 1
+      - Using `slack-notify-compact`, you can then pipe the notifications to your team that you will be cancelling their workflows in a few hours
+    - Cancels:
+      - Run the command with `window-start-in-hours` as 4, and `window-end-in-hours` as 2, and `cancel` as true
+
+## [1.3.3] - 2023-10-16
+
+- Fixed `long_job_canceller` script to log moderately more. This fixes issues in CircleCI when it doesn't see output for too long due to no output detected.
+
+## [1.3.2] - 2023-10-16
+
+- Added `circleci-long-job-cancel` as a way to spin off `circleci-continue-long-job-cancel` for workflows looking to avoid using `continue` based workflows.
+- Fixed `long_job_canceller` script to log moderately more. This fixes issues in CircleCI when it doesn't see output for too long due to no output detected.
 
 ## [1.3.1] - 2023-08-04
 
