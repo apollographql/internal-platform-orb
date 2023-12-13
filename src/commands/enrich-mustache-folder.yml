@@ -9,7 +9,7 @@ parameters:
     description: the path to your fyaml folder. Should include the folder name (ie config.fyaml)
   output-folder-path:
     type: string
-    description: destintation folder. This command will create folders your Circle fyaml expects
+    description: destination folder. This command will create folders your Circle fyaml expects
   output-file-path:
     type: string
     description: where you want the packed file to be
