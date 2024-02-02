@@ -72,8 +72,9 @@ steps:
   - setup
   - git-diff-set-parameters:
       base-revision: << parameters.base-revision >>
-      output-path: << parameters.config-path >>
       mapping: << parameters.mapping >>
+      config-path: << parameters.config-path >>
+      all-mappings-match-if-config-path-changed: << parameters.all-mappings-match-if-config-path-changed >>
   - run:
       name: pre process command
       command: |
