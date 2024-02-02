@@ -73,6 +73,8 @@ all_mappings_match = (
   os.environ.get('ALL_MAPPINGS_MATCH_IF_CONFIG_PATH_CHANGED') == 'true' 
   and os.environ.get('CONFIG_PATH') in changes)
 
+print('All mappings match: {} ("{}" "{}" "{})'.format(all_mappings_match, os.environ.get('ALL_MAPPINGS_MATCH_IF_CONFIG_PATH_CHANGED'), os.environ.get('CONFIG_PATH'), changes))
+
 def check_mapping(m):
   if 3 != len(m):
     raise Exception(f"Invalid mapping ({m})")
