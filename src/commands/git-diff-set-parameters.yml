@@ -5,10 +5,14 @@ parameters:
   base-revision:
     type: string
     description: Compare this branch to its ancestor named
-  output-path:
-    type: string
   mapping:
     type: string
+  config-path:
+    type: string
+  all-mappings-match-if-config-path-changed:
+    type: enum
+    default: ""
+    enum: ["", "true"]
 
 steps:
   - run:
@@ -18,3 +22,5 @@ steps:
         BASE_REVISION: << parameters.base-revision >>
         MAPPING: << parameters.mapping >>
         OUTPUT_PATH: /tmp/enrich-parameters.json
+        CONFIG_PATH: << parameters.config-path >>
+        ALL_MAPPINGS_MATCH_IF_CONFIG_PATH_CHANGED: << parameters.all-mappings-match-if-config-path-changed >>
