@@ -70,9 +70,7 @@ parameters:
     type: string
 steps:
   - checkout
-  - setup:
-      # FIXME revert this before merging
-      download-reference: glasser/all-mappings-match-if-config-path-changed
+  - setup
   - git-diff-set-parameters:
       base-revision: << parameters.base-revision >>
       mapping: << parameters.mapping >>
