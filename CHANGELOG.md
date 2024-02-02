@@ -5,15 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [1.4.5] - 2024-01-16
+## [1.4.7] - 2024-02-02
+
+- `enrich-mustache-from-path-filter` has a new opt-in `all-mappings-match-if-config-path-changed` feature; if set to true, any changes to the `config-path` (template) file will be treated as if all mappings match.  That is, changing how we do a build will rebuild everything with that change.
+
+
+## [1.4.6] - 2024-01-16
 
 - Updated the version of an orb used in CI to build this orb. The CI process that builds this orb requires a version bump + changelog to update the repo, so issuing a new version to update the build process.
 
-## [1.4.4] - 2023-12-13
+## [1.4.5] - 2023-12-13
 
 - `chevron` can be installed user-wide or system-wide, being invoked through `python3 -c 'from chevron import cli_main; cli_main()'`.
 
-## [1.4.3] - 2023-12-13
+## [1.4.4] - 2023-12-13
 
 - Tweaked `enrich-mustache{,-folder}` commands to operate in environments where `PATH` does not include `$HOME/.local/bin`.
 

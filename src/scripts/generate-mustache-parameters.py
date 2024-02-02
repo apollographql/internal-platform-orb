@@ -67,9 +67,17 @@ mappings = [
   mapping.splitlines()
 ]
 
+# THE ADDITION OF ALL_MAPPINGS_MATCH IS A DIVERGENCE FROM UPSTREAM
+# PATH-FILTERING.
+all_mappings_match = (
+  os.environ.get('ALL_MAPPINGS_MATCH_IF_CONFIG_PATH_CHANGED') == 'true' 
+  and os.environ.get('CONFIG_PATH') in changes)
+
 def check_mapping(m):
   if 3 != len(m):
     raise Exception(f"Invalid mapping ({m})")
+  if all_mappings_match:
+    return True
   path, param, value = m
   regex = re.compile(r'^' + path + r'$')
   for change in changes:
@@ -77,7 +85,7 @@ def check_mapping(m):
       return True
   return False
 
-# HERE IS THE DIVERGENCE FROM PATH-FILTERING
+# HERE IS THE BIG DIVERGENCE FROM PATH-FILTERING
 def convert_mapping(accumulator, current):
   """
     arguments:

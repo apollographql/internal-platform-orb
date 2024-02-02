@@ -29,6 +29,10 @@ parameters:
   config-path:
     description: Location of the (mustache enriched) config file
     type: string
+  all-mappings-match-if-config-path-changed:
+    type: boolean
+    description: If true, then if the file in config-path changed, treat all mappings as if they match
+    default: false
   pre-process-command:
     description: allows you to insert a command after set-parameters has generated a JSON file. Useful for post-processing same (ie with jq's + command)
     default: ""
