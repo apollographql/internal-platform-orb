@@ -10,7 +10,9 @@ parameters:
   config-path:
     type: string
   all-mappings-match-if-config-path-changed:
-    type: boolean
+    type: enum
+    default: ""
+    enum: ["", "true"]
 
 steps:
   - run:
