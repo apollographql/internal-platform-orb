@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.4.8] - 2025-07-23
 
-- `slack-notify-compact` (and subsequent comamnds that leverage this base command) has a new opt-in `continue_on_failure` paramter; if set to true, the command will continue execution even if the job fails.
+- `slack-notify-compact` (and subsequent commands that leverage this base command) has a new opt-in `continue_on_failure` parameter; if set to true, the command will continue execution even if the job fails.
 
 ## [1.4.7] - 2024-02-02
 
