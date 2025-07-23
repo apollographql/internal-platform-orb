@@ -5,6 +5,10 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.8] - 2025-07-23
+
+- `slack-notify-compact` (and subsequent comamnds that leverage this base command) has a new opt-in `continue_on_failure` paramter; if set to true, the command will continue execution even if the job fails.
+
 ## [1.4.7] - 2024-02-02
 
 - `enrich-mustache-from-path-filter` has a new opt-in `all-mappings-match-if-config-path-changed` feature; if set to true, any changes to the `config-path` (template) file will be treated as if all mappings match.  That is, changing how we do a build will rebuild everything with that change.

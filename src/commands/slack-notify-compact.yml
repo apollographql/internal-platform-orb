@@ -31,6 +31,10 @@ parameters:
       1. Create your message template using the Block Kit Builder: https://app.slack.com/block-kit-builder/.
       2. Insert any desired environment variables.
       3. Paste value here.
+  continue_on_failure:
+    type: boolean
+    default: false
+    description: Whether to continue execution even if this step fails
 steps:
   - run:
       when: on_fail
@@ -51,3 +55,4 @@ steps:
         SLACK_PARAM_CHANNEL: "<<parameters.channel>>"
         SLACK_PARAM_CUSTOM: "<<parameters.custom>>"
       command: bash /tmp/apollo_internal_platform_orb/src/scripts/alert-slack-notify.sh
+      continue_on_failure: << parameters.continue_on_failure >>

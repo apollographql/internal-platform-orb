@@ -16,6 +16,10 @@ parameters:
   command:
     type: string
     description: A command which must produce a /tmp/notification.txt file
+  continue_on_failure:
+    type: boolean
+    default: false
+    description: Whether to continue execution even if this job fails
 docker:
   - image: cimg/base:stable
 resource_class: small
@@ -25,3 +29,4 @@ steps:
   - slack-from-command:
       channel: << parameters.channel >>
       command: << parameters.command >>
+      continue_on_failure: << parameters.continue_on_failure >>

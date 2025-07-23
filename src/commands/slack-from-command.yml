@@ -11,6 +11,10 @@ parameters:
   command:
     type: string
     description: A command which must produce a /tmp/notification.txt file
+  continue_on_failure:
+    type: boolean
+    default: false
+    description: Whether to continue execution even if this step fails
 
 steps:
   - run:
@@ -59,3 +63,4 @@ steps:
             }
           }]
         }
+      continue_on_failure: << parameters.continue_on_failure >>

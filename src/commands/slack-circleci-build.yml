@@ -26,6 +26,10 @@ parameters:
     type: string
     description: Who did the action
     default: "gh:$CIRCLE_USERNAME"
+  continue_on_failure:
+    type: boolean
+    default: false
+    description: Whether to continue execution even if this step fails
 steps:
   - run:
       name: Init...
@@ -54,6 +58,7 @@ steps:
             }
           }]
         }
+      continue_on_failure: << parameters.continue_on_failure >>
   - when:
       condition:
         or:
@@ -74,3 +79,4 @@ steps:
                 }
               }]
             }
+          continue_on_failure: << parameters.continue_on_failure >>
