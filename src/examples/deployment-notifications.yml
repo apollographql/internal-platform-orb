@@ -27,6 +27,7 @@ usage:
             emoji: ':checkered_flag:'
             notify: '*finished build* of app:my-example'
             fail: '*failed build* of app:my-example'
+            # continue_on_failure: true  # Optional: won't fail the workflow if notification fails
             requires:
               - build-and-deploy-it
             context:

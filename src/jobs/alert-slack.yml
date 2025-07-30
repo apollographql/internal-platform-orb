@@ -40,6 +40,10 @@ parameters:
     type: string
     description: '`no-changes-iregex` parameter to be passed to `proceed-if-changes`'
     default: ''
+  continue_on_failure:
+    type: boolean
+    default: false
+    description: Whether to continue execution even if this job fails
 docker:
 - image: cimg/base:stable
 resource_class: small
@@ -56,3 +60,4 @@ steps:
     notify: << parameters.notify >>
     fail: << parameters.fail >>
     emoji: << parameters.emoji >>
+    continue_on_failure: << parameters.continue_on_failure >>
