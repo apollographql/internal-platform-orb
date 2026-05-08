@@ -99,9 +99,13 @@ def convert_mapping(accumulator, current):
 
   if is_parameter_an_array:
     parameter_array = accumulator.get(parameter_name, [])
+    # In 2026 we have no idea why this supports arrays explicitly but only looks at one
+    # element. Probably we should ditch this whole orb and move things to GH Actions.
     parameter_value_array_value = parameter_value[0]
 
-    parameter_array.append(parameter_value_array_value)
+    # Deduplicate
+    if parameter_value_array_value not in parameter_array:
+      parameter_array.append(parameter_value_array_value)
     accumulator[parameter_name] = parameter_array
   else:
     accumulator[parameter_name] = parameter_value
