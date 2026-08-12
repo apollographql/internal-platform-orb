@@ -13,7 +13,7 @@ description: >
 
   NOTES:
   - Must be run with the slack-orb context
-  - Must be run on a system with JQ and Curl installed
+  - Must be run on a system with JQ, envsubst (via gettext-base) and Curl installed
 parameters:
   event:
     description: |

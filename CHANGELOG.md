@@ -5,6 +5,14 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.10] - 2026-08-04
+
+- `alert-slack-notify.sh` (used by `slack-notify-compact` and everything built on it, e.g. `slack-circleci-build`) no longer uses `eval echo` to expand `$VAR` references in the message template. `eval` re-parses the template as shell source, so a `$(...)` or backtick sequence coming from an interpolated variable (commit message, PR title, etc.) could execute as a command.
+- Variable expansion now happens once per JSON string leaf via `envsubst`, with each result written back via `jq --arg`/`setpath`. This can't produce invalid JSON no matter what an interpolated value contains, unlike substituting directly into the raw template text.
+- Obviously-secret-named env vars (matching `TOKEN|SECRET|KEY|PASSWORD|CREDENTIAL`) are unset before expansion, so an interpolated value can't reference and leak one into the posted message.
+- A malformed template now fails the step (`jq empty` check) instead of silently posting broken JSON to Slack.
+- Script now declares `#!/bin/bash` (matching how `slack-notify-compact` actually invokes it, and its existing use of bash-only `[[ ]]` syntax) instead of the previous, inaccurate `#!/bin/sh`.
+
 ## [1.4.9] - 2025-07-31
 
 - Pin `requests` package to `>=2.32.4`
