@@ -5,13 +5,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [1.4.11] - 2026-08-12
+
+- `alert-slack-notify.sh` is now a thin wrapper that sources `/tmp/SLACK_JOB_STATUS` and execs a new `alert-slack-notify.js`, ported to Node.js. Variable expansion, secret-stripping, and the Slack API call are unchanged in behavior, but no longer shell out to `envsubst`/`jq`/`curl`.
+- `alert-slack` and `alert-slack-from-command` jobs now run on `cimg/node:lts` instead of `cimg/base:stable`, since the notify step requires Node.
+
 ## [1.4.10] - 2026-08-04
 
 - `alert-slack-notify.sh` (used by `slack-notify-compact` and everything built on it, e.g. `slack-circleci-build`) no longer uses `eval echo` to expand `$VAR` references in the message template. `eval` re-parses the template as shell source, so a `$(...)` or backtick sequence coming from an interpolated variable (commit message, PR title, etc.) could execute as a command.
-- Variable expansion now happens once per JSON string leaf via `envsubst`, with each result written back via `jq --arg`/`setpath`. This can't produce invalid JSON no matter what an interpolated value contains, unlike substituting directly into the raw template text.
+- `alert-slack-notify.sh` is now a thin wrapper that sources `/tmp/SLACK_JOB_STATUS` and execs a new `alert-slack-notify.js`, ported to Node.js. Variable expansion and the Slack API call are unchanged in behavior`.
 - Obviously-secret-named env vars (matching `TOKEN|SECRET|KEY|PASSWORD|CREDENTIAL`) are unset before expansion, so an interpolated value can't reference and leak one into the posted message.
-- A malformed template now fails the step (`jq empty` check) instead of silently posting broken JSON to Slack.
-- Script now declares `#!/bin/bash` (matching how `slack-notify-compact` actually invokes it, and its existing use of bash-only `[[ ]]` syntax) instead of the previous, inaccurate `#!/bin/sh`.
+- `alert-slack` and `alert-slack-from-command` jobs now run on `cimg/node:lts` instead of `cimg/base:stable`, since the notify step requires Node.
 
 ## [1.4.9] - 2025-07-31
 
